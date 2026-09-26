@@ -1,0 +1,13 @@
+:{$PORT} {
+  @api path /api/*
+
+  handle @api {
+    reverse_proxy {$BACKEND_INTERNAL_URL}
+  }
+
+  handle {
+    root * /srv
+    try_files {path} /index.html
+    file_server
+  }
+}
