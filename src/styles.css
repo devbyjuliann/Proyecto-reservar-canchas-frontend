@@ -224,6 +224,111 @@ a { color: inherit; }
 .conflict-layout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 1rem; align-items: start; }.conflict-list { display: grid; overflow: hidden; background: var(--white); border-radius: var(--radius); }.conflict-row { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: .75rem; align-items: center; min-height: 72px; padding: .8rem 1rem; text-align: left; color: var(--rubber); background: transparent; border: 0; border-bottom: 1px solid var(--rule); }.conflict-row:hover, .conflict-row.selected { background: #edf1ea; }.conflict-id { color: var(--court); font-weight: 740; }.conflict-row > span:nth-child(2) { display: grid; gap: .2rem; }.conflict-row small { color: var(--muted); }.conflict-row .open, .conflict-row .resolved { padding: .32rem .5rem; border-radius: 999px; font-size: .68rem; font-weight: 700; }.conflict-row .open { color: #913535; background: #f5ddda; }.conflict-row .resolved { color: #246350; background: #dcece6; }
 .conflict-detail { position: sticky; top: 1rem; min-height: 420px; padding: 1.3rem; background: #e4e7dc; border-radius: var(--radius); }.conflict-detail > header { display: flex; justify-content: space-between; color: var(--muted); font-size: .76rem; }.conflict-detail h2 { margin: 2rem 0 1.2rem; font-size: 1.45rem; }
 
+/* Public marketplace: the court diagram remains the shared product signature. */
+.market-frame { min-height: 100vh; background: var(--paper); }
+.market-header { position: sticky; top: 0; z-index: 30; color: var(--line); background: var(--rubber); }
+.market-header-inner { width: min(1360px, calc(100% - 4rem)); min-height: 76px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.market-header .brand { flex: 0 0 auto; }
+.market-header .brand-mark { width: 38px; height: 38px; }
+.market-nav { display: flex; align-items: center; gap: 1.35rem; flex: 1; }
+.market-nav-link { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; color: #d5dfda; background: transparent; border: 0; text-decoration: none; font-weight: 600; font-size: .88rem; white-space: nowrap; }
+.market-nav-link:hover, .market-nav-link.active { color: var(--ball); }
+.market-account { display: flex; align-items: center; gap: 1.2rem; margin-left: auto; }
+.market-account-name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--line); font-size: .85rem; font-weight: 700; }
+.market-register { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: .5rem .9rem; border-radius: 8px; color: var(--rubber); background: var(--ball); text-decoration: none; font-size: .86rem; font-weight: 720; white-space: nowrap; }
+.market-register:hover { background: #e2ef66; }
+.market-menu-button { display: none; color: var(--line); }
+.market-main { min-width: 0; }
+.market-home, .market-detail-page, .court-detail-page, .owner-intro-page { width: min(1280px, calc(100% - 4rem)); margin-inline: auto; }
+.market-hero { position: relative; display: flex; align-items: center; min-height: 400px; overflow: hidden; padding: 3.6rem clamp(2rem, 6vw, 5.5rem) 5.5rem; color: var(--line); background: var(--court); }
+.market-hero-copy { position: relative; z-index: 2; max-width: 700px; }
+.market-hero h1 { max-width: 11ch; margin: 0; font-size: clamp(3.2rem, 6.3vw, 6.4rem); font-weight: 790; line-height: .88; letter-spacing: -.052em; }
+.market-hero p { max-width: 48ch; margin: 1.5rem 0 0; color: #daeee8; line-height: 1.55; font-size: 1rem; }
+.hero-field { position: absolute; width: 44%; height: 88%; right: -8%; top: 5%; transform: rotate(-12deg); border: 3px solid rgba(247,245,233,.65); }
+.hero-field::before, .hero-field::after, .hero-field i { content: ""; position: absolute; border-color: rgba(247,245,233,.65); }
+.hero-field::before { top: 50%; left: 0; right: 0; border-top: 3px solid; }
+.hero-field::after { left: 50%; top: 0; bottom: 0; border-left: 3px solid; }
+.hero-field i:first-child { inset: 16% 22%; border: 3px solid; }.hero-field i:nth-child(2) { top: 16%; bottom: 16%; left: 50%; border-left: 3px solid; }.hero-field i:last-child { width: 34px; height: 34px; top: 11%; left: 18%; border-radius: 50%; background: var(--ball); border: 0; }
+.market-search-section { position: relative; z-index: 2; margin: -3rem clamp(1rem, 4vw, 3.5rem) 0; padding: 1.6rem 1.8rem 1.7rem; background: var(--white); box-shadow: var(--shadow); border-radius: 12px; }
+.market-search-heading, .market-results-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.2rem; }
+.market-search-heading h2, .market-results-heading h2 { margin: 0; font-size: clamp(1.5rem, 2.8vw, 2.15rem); letter-spacing: -.035em; line-height: 1.1; }
+.market-search-heading p, .market-results-heading p { margin: .45rem 0 0; color: var(--muted); line-height: 1.45; font-size: .9rem; }
+.market-search-heading > svg { color: var(--court); flex-shrink: 0; }
+.market-search-form { display: grid; grid-template-columns: minmax(160px, 1.45fr) minmax(130px, .85fr) minmax(130px, .85fr) minmax(160px, .85fr) auto; gap: .75rem; align-items: start; margin-top: 1.5rem; }
+.market-field { display: grid; gap: .42rem; min-width: 0; color: #44534f; font-size: .78rem; font-weight: 680; }
+.market-field input { min-width: 0; width: 100%; min-height: 46px; padding: .7rem .8rem; color: var(--rubber); background: var(--paper); border: 1px solid #b8c3bc; border-radius: 8px; }
+.market-field small { line-height: 1.3; font-weight: 450; color: var(--muted); }
+.market-search-actions { display: flex; gap: .4rem; padding-top: 1.35rem; }
+.market-input-error { margin: .75rem 0 0; color: #992c2c; font-size: .85rem; }
+.market-results { padding: 4.5rem 0 2rem; }
+.market-view-switch { display: inline-flex; flex: 0 0 auto; padding: 4px; border-radius: 9px; background: #e4e9df; }
+.market-view-switch button { min-height: 38px; padding: .45rem .85rem; color: #45564e; background: transparent; border: 0; border-radius: 6px; font-size: .84rem; font-weight: 650; }
+.market-view-switch button[aria-pressed="true"] { color: var(--line); background: var(--rubber); }
+.market-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.3rem; margin-top: 1.6rem; }
+.listing-card { min-width: 0; display: grid; grid-template-columns: minmax(142px, 38%) 1fr; min-height: 220px; overflow: hidden; color: var(--rubber); background: var(--white); border: 1px solid var(--rule); border-radius: 12px; text-decoration: none; transition: border-color 160ms ease-out, transform 160ms ease-out; }
+.listing-card:hover { border-color: var(--court); transform: translateY(-2px); }
+.listing-illustration { position: relative; display: grid; align-items: end; overflow: hidden; padding: 1.2rem; color: var(--line); background: var(--court); }
+.listing-illustration.is-court { background: var(--zone); }
+.listing-field { position: absolute; inset: 17% 13%; border: 2px solid rgba(247,245,233,.78); }
+.listing-field::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 2px solid rgba(247,245,233,.78); }
+.listing-field::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px solid rgba(247,245,233,.78); }
+.listing-field i:first-child { position: absolute; inset: 18% 20%; border: 2px solid rgba(247,245,233,.78); }.listing-field i:nth-child(2) { position: absolute; top: 18%; bottom: 18%; left: 50%; border-left: 2px solid rgba(247,245,233,.78); }.listing-field i:last-child { position: absolute; width: 16px; height: 16px; top: 14%; right: 18%; border-radius: 50%; background: var(--ball); }
+.listing-sport { position: relative; z-index: 1; max-width: 15ch; color: var(--line); font-size: .8rem; font-weight: 700; line-height: 1.2; }
+.listing-content { display: flex; flex-direction: column; min-width: 0; padding: 1.25rem 1.35rem 1rem; }
+.listing-location, .detail-location { display: inline-flex; align-items: center; gap: .3rem; color: var(--court); font-size: .8rem; font-weight: 690; }
+.listing-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-top: .5rem; }.listing-title-row h3 { margin: 0; font-size: clamp(1.12rem, 1.65vw, 1.55rem); line-height: 1.14; letter-spacing: -.025em; }.listing-title-row svg { flex: 0 0 auto; color: var(--court); }
+.listing-content > p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: .65rem 0 1rem; color: var(--muted); font-size: .82rem; line-height: 1.45; }
+.listing-footer { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-top: auto; padding-top: .8rem; border-top: 1px solid var(--rule); font-size: .76rem; }
+.listing-footer span { color: var(--muted); }.listing-footer strong { font-size: .95rem; font-variant-numeric: tabular-nums; }
+.owner-cta { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin: 2.5rem 0 5rem; padding: 2rem clamp(1.5rem, 4vw, 3.5rem); background: #dce7dd; border-radius: 12px; }.owner-cta h2 { max-width: 20ch; margin: 0; font-size: clamp(1.5rem, 2.5vw, 2.15rem); line-height: 1.1; letter-spacing: -.035em; }.owner-cta p { max-width: 50ch; margin: .5rem 0 0; color: var(--muted); font-size: .88rem; line-height: 1.45; }
+.market-detail-page { padding: 2.2rem 0 5rem; }
+.market-detail-hero { position: relative; overflow: hidden; display: flex; align-items: center; min-height: 300px; padding: clamp(2rem, 5vw, 4rem); color: var(--line); background: var(--rubber); }
+.detail-hero-content { position: relative; z-index: 1; max-width: 750px; }.detail-location { color: var(--ball); }.market-detail-hero h1 { margin: .65rem 0 0; font-size: clamp(2.6rem, 5.5vw, 5rem); line-height: .95; letter-spacing: -.048em; }.market-detail-hero p { max-width: 60ch; margin: 1.1rem 0; line-height: 1.55; }.market-detail-hero address { font-size: .9rem; color: #c9d9d2; font-style: normal; }
+.detail-field { position: absolute; right: -5%; top: -20%; width: 40%; height: 130%; transform: rotate(-14deg); border: 2px solid #76958a; }.detail-field::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 2px solid #76958a; }.detail-field::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px solid #76958a; }.detail-field i:first-child { position: absolute; inset: 15% 22%; border: 2px solid #76958a; }
+.detail-list-section { padding-top: 3rem; }
+.court-detail-intro { padding: 2.2rem 0 1.3rem; }.court-detail-heading { display: flex; justify-content: space-between; align-items: end; gap: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--rule); }.court-detail-heading h1 { margin: .65rem 0 0; font-size: clamp(2.6rem, 5vw, 4.7rem); line-height: .94; letter-spacing: -.05em; }.court-detail-heading p { max-width: 58ch; margin: .9rem 0; color: var(--muted); line-height: 1.5; }
+.sport-pill { display: inline-block; padding: .4rem .65rem; border-radius: 5px; color: var(--white); background: var(--zone); font-weight: 700; font-size: .78rem; }
+.court-prices { display: grid; min-width: 230px; padding: 1rem 1.2rem; color: var(--line); background: var(--rubber); border-radius: 10px; }.court-prices > span { padding-bottom: .5rem; color: #c9d9d2; font-size: .76rem; }.court-prices > div { display: flex; justify-content: space-between; gap: 1rem; padding: .55rem 0; border-top: 1px solid #486058; font-size: .82rem; }.court-prices strong { font-variant-numeric: tabular-nums; }
+.court-detail-page .booking-layout { min-height: 560px; grid-template-columns: minmax(0, 1fr) 328px; margin-bottom: 4rem; }.court-detail-page .booking-stage { padding: 1.4rem 1.5rem 2rem 0; }.court-detail-page .booking-ticket { top: 92px; height: min(660px, calc(100vh - 108px)); border: 1px solid #cad2ca; border-radius: 10px; }.court-detail-page .booking-hero h2 { max-width: 15ch; margin: 0; font-size: clamp(2rem, 3.6vw, 3.5rem); line-height: .98; letter-spacing: -.04em; }.court-detail-page .court-search { grid-template-columns: minmax(190px, 1fr) auto; }.slot-price { font-size: .95rem; font-weight: 750; font-variant-numeric: tabular-nums; }.success-price { display: block; margin-bottom: 1.25rem; font-size: 1.25rem; }.ticket-success .button + .button { margin-top: .6rem; }
+.price-update-notice { margin: 1.1rem 0; }
+.booking-price { color: var(--rubber) !important; font-size: .91rem !important; font-weight: 730; font-variant-numeric: tabular-nums; }
+.market-main .auth-layout { min-height: calc(100vh - 76px); }.market-main .auth-intro { min-height: calc(100vh - 76px); }
+.owner-intro-page { padding: 2rem 0 5rem; }.owner-intro-panel { min-height: 55vh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(2rem, 6vw, 5rem); color: var(--line); background: var(--court); }.owner-intro-panel h1 { max-width: 12ch; margin: 0; font-size: clamp(2.7rem, 5vw, 5rem); line-height: .94; letter-spacing: -.048em; }.owner-intro-panel p { max-width: 54ch; line-height: 1.55; }.owner-intro-panel .button { margin-top: 1rem; }
+
+/* Owner onboarding stays in the marketplace language; operations stay deliberately quieter. */
+.owner-onboarding, .profile-page { width: min(1120px, calc(100% - 4rem)); margin: 0 auto; padding: 2.2rem 0 5rem; }
+.owner-onboarding-hero { position: relative; display: flex; align-items: center; min-height: 270px; overflow: hidden; padding: clamp(2rem, 4vw, 3.5rem); color: var(--line); background: var(--court); }
+.owner-onboarding-hero > div { position: relative; z-index: 1; max-width: 730px; }.owner-onboarding-hero h1 { max-width: 18ch; margin: 0; font-size: clamp(2.3rem, 4.4vw, 4.5rem); line-height: .96; letter-spacing: -.045em; }.owner-onboarding-hero p { max-width: 64ch; margin: 1.1rem 0 0; line-height: 1.55; color: #d5eae3; }
+.owner-hero-mark { position: absolute; width: 35%; height: 115%; right: -5%; top: -12%; transform: rotate(-10deg); border: 2px solid rgba(247,245,233,.55); }.owner-hero-mark::before { content: ""; position: absolute; inset: 18% 20%; border: 2px solid rgba(247,245,233,.55); }.owner-hero-mark::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px solid rgba(247,245,233,.55); }.owner-hero-mark i:first-child { position: absolute; top: 50%; left: 0; right: 0; border-top: 2px solid rgba(247,245,233,.55); }
+.owner-onboarding-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .9fr); gap: 1.4rem; margin-top: 1.7rem; align-items: start; }
+.owner-apply-panel, .owner-history { min-width: 0; padding: 1.7rem; background: var(--white); border-radius: 10px; border: 1px solid var(--rule); }
+.owner-apply-panel h2, .owner-history h2 { margin: 0 0 .6rem; font-size: 1.4rem; letter-spacing: -.025em; }.owner-apply-panel > p { max-width: 52ch; margin: 0 0 1.2rem; color: var(--muted); line-height: 1.5; font-size: .88rem; }.owner-apply-panel .form-stack { margin-top: 1.2rem; }.owner-apply-panel .button { width: max-content; }
+.owner-history-list { display: grid; }.owner-history-item { padding: 1rem 0; border-bottom: 1px solid var(--rule); }.owner-history-item:last-child { border-bottom: 0; }.owner-history-item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: .8rem; }.owner-history-item-head strong { overflow-wrap: anywhere; }.owner-history-item p { margin: .35rem 0 0; color: var(--muted); font-size: .8rem; }.owner-history-item .owner-rejection-reason { color: #852e2e; }
+.owner-history-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem; margin-bottom: .4rem; }.owner-history-title h2 { margin-bottom: 0; }
+.owner-state { display: inline-flex; width: max-content; flex: 0 0 auto; align-items: center; padding: .35rem .6rem; border-radius: 999px; font-size: .73rem; font-weight: 720; line-height: 1.2; white-space: nowrap; }.owner-state.state-pendiente { color: #684c12; background: #f3e7bc; }.owner-state.state-aprobada { color: #145c48; background: #d9ede3; }.owner-state.state-rechazada { color: #842f2f; background: #f6dfdd; }
+.profile-card { display: grid; grid-template-columns: auto 1fr; gap: 1rem 1.4rem; padding: 1.8rem; background: var(--white); border: 1px solid var(--rule); border-radius: var(--radius); }.profile-card > svg { grid-row: span 3; color: var(--court); }.profile-card > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; padding-bottom: .65rem; border-bottom: 1px solid var(--rule); }.profile-card > div:last-child { border-bottom: 0; }.profile-card span { min-width: 80px; color: var(--muted); font-size: .8rem; }.profile-card strong { overflow-wrap: anywhere; }.profile-links { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.4rem; }.profile-links a { display: inline-flex; justify-content: space-between; align-items: center; gap: 2rem; min-height: 50px; padding: .7rem 1rem; color: var(--rubber); background: #e1eae1; border-radius: 8px; font-size: .9rem; font-weight: 680; text-decoration: none; }.profile-links a:hover { background: #d1e1d3; }
+.applications-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(320px, 1.1fr); gap: 1.1rem; align-items: start; }.applications-list, .application-detail { min-width: 0; }.application-detail { position: sticky; top: 1.3rem; max-height: calc(100vh - 2.6rem); overflow: auto; padding: 1.4rem; background: var(--white); border: 1px solid var(--rule); border-radius: 10px; }.application-row { width: 100%; min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1rem; color: var(--rubber); text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--rule); }.application-row:last-child { border-bottom: 0; }.application-row:hover, .application-row.selected { background: #e9eee7; }.application-row > span:first-child { display: grid; gap: .25rem; min-width: 0; }.application-row strong { overflow-wrap: anywhere; font-size: .88rem; }.application-row small { color: var(--muted); font-size: .75rem; }
+.application-detail-heading { padding-bottom: 1.2rem; border-bottom: 1px solid var(--rule); }.application-detail-heading h2 { margin: .7rem 0 .4rem; font-size: 1.55rem; letter-spacing: -.03em; }.application-detail-heading p { margin: .2rem 0; overflow-wrap: anywhere; color: var(--muted); font-size: .82rem; }.application-message, .application-next-step { margin-top: 1.3rem; padding: 1rem; background: #edf1e9; border-radius: 9px; }.application-message p, .application-next-step p { margin: .4rem 0 0; color: #4e5d57; line-height: 1.5; font-size: .84rem; }.application-next-step .button { margin-top: .9rem; }.application-facts { margin: 1.1rem 0; }.application-facts div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .4rem; padding: .6rem 0; border-bottom: 1px solid var(--rule); font-size: .82rem; }.application-facts dt { color: var(--muted); }.application-facts dd { margin: 0; font-weight: 650; }.application-decisions { display: grid; justify-items: start; gap: 1.25rem; margin-top: 1.2rem; }.application-decisions form { width: 100%; display: grid; justify-items: start; gap: .7rem; padding-top: 1rem; border-top: 1px solid var(--rule); }.application-decisions .field { width: 100%; }
+.membership-assign { display: flex; align-items: end; gap: .7rem; margin: 1.2rem 0; }.membership-assign .field { min-width: 0; flex: 1; }.membership-assign select { width: 100%; min-height: 46px; padding: .7rem .8rem; border: 1px solid #b8c3bc; border-radius: 8px; background: var(--white); color: var(--rubber); }.membership-list { background: var(--white); border-radius: 10px; overflow: hidden; }.membership-row { display: flex; align-items: center; gap: 1rem; min-height: 92px; padding: .9rem 1rem; border-bottom: 1px solid var(--rule); }.membership-row:last-child { border: 0; }.membership-row > div:first-child { display: grid; gap: .2rem; min-width: 0; flex: 1; }.membership-row strong, .membership-row p { overflow-wrap: anywhere; }.membership-row p { margin: 0; color: var(--muted); font-size: .78rem; }.membership-row small { color: var(--muted); font-size: .73rem; }.membership-actions { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }.membership-actions span { color: #842f2f; font-size: .75rem; }
+.owner-console { width: min(1100px, calc(100% - 4rem)); margin-inline: auto; padding: 2.2rem 0 5rem; }.owner-console-hero { display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: clamp(2rem, 5vw, 4rem); color: var(--line); background: var(--rubber); border-left: 8px solid var(--court); }.owner-console-hero > svg { flex: 0 0 auto; color: var(--ball); }.owner-console-label { color: #c0d7ce; font-size: .83rem; font-weight: 680; }.owner-console-hero h1 { margin: .6rem 0 0; max-width: 20ch; font-size: clamp(2.6rem, 5vw, 4.3rem); line-height: .95; letter-spacing: -.045em; }.owner-console-hero p { max-width: 58ch; margin: 1rem 0 0; color: #cfddd6; line-height: 1.52; font-size: .9rem; }
+.owner-console-body { padding: 2rem 0; }.owner-section-heading { margin-bottom: 1.2rem; }.owner-section-heading h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.026em; }.owner-section-heading p { margin: .4rem 0 0; color: var(--muted); font-size: .86rem; }.owner-facility-list { display: grid; background: var(--white); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }.owner-facility-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 110px; padding: 1rem 1.5rem; color: var(--rubber); text-decoration: none; border-bottom: 1px solid var(--rule); }.owner-facility-row:last-child { border: 0; }.owner-facility-row:hover { background: #edf1e9; }.owner-facility-row > svg { flex: 0 0 auto; color: var(--court); }.owner-facility-row h3 { margin: .3rem 0 .5rem; font-size: 1.15rem; }.owner-facility-city { display: flex; align-items: center; gap: .25rem; color: var(--court); font-size: .78rem; font-weight: 660; }.owner-facility-states { display: flex; flex-wrap: wrap; gap: .45rem; }.owner-facility-detail .owner-console-body { padding: 1.6rem; background: var(--white); border: 1px solid var(--rule); }.owner-detail-facts { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 2rem; margin: 1.3rem 0; }.owner-detail-facts div { display: grid; align-content: start; gap: .35rem; padding: .8rem 0; border-bottom: 1px solid var(--rule); }.owner-detail-facts dt { color: var(--muted); font-size: .78rem; }.owner-detail-facts dd { display: flex; align-items: center; gap: .3rem; margin: 0; overflow-wrap: anywhere; font-weight: 660; }
+
+.owner-facility-count { color: var(--muted); font-size: .76rem; font-weight: 650; }
+.owner-work-section { margin-bottom: 1.3rem; padding: 1.6rem; background: var(--white); border: 1px solid var(--rule); border-radius: 10px; }
+.owner-facility-detail .owner-work-section { margin: 1.5rem 0 0; padding: 1.5rem 0 0; background: transparent; border: 0; border-top: 1px solid var(--rule); border-radius: 0; }
+.owner-work-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.2rem; }.owner-work-heading h2, .owner-danger-zone h2 { margin: 0; font-size: 1.35rem; letter-spacing: -.025em; }.owner-work-heading p, .owner-danger-zone p { max-width: 64ch; margin: .35rem 0 0; color: var(--muted); font-size: .84rem; line-height: 1.45; }.owner-work-heading .button { flex: 0 0 auto; }
+.owner-editor { margin-top: 1.2rem; padding: 1.25rem; background: #edf1ea; border-radius: 10px; }.owner-editor .field select, .owner-period-row select, .owner-period-row input { min-height: 46px; width: 100%; padding: .6rem .75rem; color: var(--rubber); background: var(--white); border: 1px solid #b8c3bc; border-radius: 8px; }.owner-editor .field textarea { min-height: 95px; }.owner-editor .form-actions { flex-wrap: wrap; }
+.owner-form-error { margin: .4rem 0 0; color: #8b2f2f; font-size: .82rem; line-height: 1.45; }
+.owner-policy-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.1rem; }.owner-policy-facts div { display: grid; gap: .3rem; padding: 1rem; color: var(--line); background: var(--court); border-radius: 8px; }.owner-policy-facts span { color: #d5ece4; font-size: .78rem; }.owner-policy-facts strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.owner-courts-list, .owner-data-list { display: grid; margin-top: 1.2rem; overflow: hidden; background: var(--white); border: 1px solid var(--rule); border-radius: 8px; }.owner-court-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 72px; padding: .85rem 1rem; border-bottom: 1px solid var(--rule); color: var(--rubber); text-decoration: none; }.owner-court-row:last-child, .owner-data-row:last-child { border-bottom: 0; }.owner-court-row:hover { background: #edf1e9; }.owner-court-row > div { display: grid; gap: .25rem; min-width: 0; flex: 1; }.owner-court-row strong { font-size: .95rem; }.owner-court-row span:not(.owner-state) { color: var(--muted); font-size: .79rem; }.owner-court-row > svg { flex: 0 0 auto; color: var(--court); }
+.owner-danger-zone { margin-top: 2rem !important; }.owner-danger-zone > .button { margin-top: 1rem; }.owner-inline-confirm { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; padding: 1rem; color: #7f2d2d; background: #fae5e2; border-radius: 8px; }.owner-inline-confirm strong { width: 100%; font-size: .85rem; }
+.owner-court-location { display: flex; align-items: center; gap: .35rem; margin-top: .7rem; color: #cfddd6; font-size: .82rem; }.owner-court-page .owner-console-hero .owner-state { align-self: flex-start; }
+.owner-section-nav { position: sticky; top: 76px; z-index: 20; display: flex; gap: .3rem; overflow-x: auto; margin: 1.1rem 0 0; padding: .35rem; background: #e1e8df; border-radius: 9px; scrollbar-width: thin; }.owner-section-nav button { flex: 1 0 auto; min-height: 44px; padding: .6rem .85rem; border: 0; border-radius: 6px; color: #42564b; background: transparent; font-size: .86rem; font-weight: 670; }.owner-section-nav button[aria-pressed="true"] { color: var(--line); background: var(--rubber); }
+.owner-court-content { padding: 1.2rem 0 3rem; }.owner-court-content .owner-work-section { margin-bottom: 1rem; }.owner-week-board { display: grid; margin-top: 1rem; background: #f0f3ed; border-radius: 8px; overflow: hidden; }.owner-week-board > div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 1rem; padding: .75rem 1rem; border-bottom: 1px solid var(--rule); font-size: .85rem; }.owner-week-board > div:last-child { border: 0; }.owner-week-board strong { color: var(--court); }.owner-week-board span { font-variant-numeric: tabular-nums; }
+.owner-period-editor { display: grid; gap: .7rem; }.owner-period-row { display: grid; grid-template-columns: 1fr 1fr 40px; align-items: end; gap: .6rem; }.owner-period-row.with-day { grid-template-columns: 1.1fr 1fr 1fr 40px; }
+.owner-data-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .7rem; padding: 1rem; border-bottom: 1px solid var(--rule); }.owner-data-row > div:first-child { min-width: 0; flex: 1; }.owner-data-row p { margin: .3rem 0; color: var(--muted); font-size: .82rem; line-height: 1.45; }.owner-data-row small { color: var(--muted); font-size: .76rem; font-variant-numeric: tabular-nums; }.owner-row-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; }.owner-row-actions > span { width: 100%; color: #842f2f; font-size: .78rem; }
+.owner-price-list { display: grid; gap: .7rem; margin-top: 1rem; }.owner-price-row { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(200px, 1.3fr) auto auto; align-items: end; gap: .75rem; padding: 1rem; background: #f0f3ed; border-radius: 8px; }.owner-price-row > div:first-child { display: grid; gap: .3rem; align-self: center; }.owner-price-row > div:first-child strong { font-size: 1.08rem; }.owner-price-row > div:first-child span { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }.owner-price-row > .owner-row-actions { grid-column: 3 / -1; }.owner-price-row > .owner-form-error { grid-column: 1 / -1; }
+
 @keyframes pulse { to { opacity: .48; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -268,4 +373,121 @@ a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 1160px) {
+  .market-search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .market-search-actions { grid-column: 1 / -1; padding-top: .3rem; }
+}
+
+@media (max-width: 780px) {
+  .market-header-inner { width: calc(100% - 2rem); min-height: 64px; }
+  .market-header .brand { font-size: .92rem; }.market-header .brand-mark { width: 32px; height: 32px; }
+  .market-menu-button { display: grid; }
+  .market-nav { position: absolute; top: 100%; left: 0; right: 0; display: none; align-items: stretch; flex-direction: column; gap: .15rem; padding: .9rem 1rem 1.1rem; background: var(--rubber); box-shadow: 0 20px 30px rgba(21,37,33,.25); }
+  .market-nav.is-open { display: flex; }.market-nav-link { padding: .6rem; }.market-account { width: 100%; align-items: stretch; flex-direction: column; gap: .1rem; margin: .4rem 0 0; padding-top: .4rem; border-top: 1px solid #52655e; }.market-account-name { max-width: none; padding: .6rem; }.market-register { justify-content: flex-start; margin-top: .4rem; }
+  .market-home, .market-detail-page, .court-detail-page, .owner-intro-page { width: calc(100% - 2rem); }
+  .market-hero { min-height: 325px; padding: 2.5rem 1.8rem 4.2rem; }.market-hero h1 { font-size: clamp(3rem, 9vw, 5rem); }.market-hero p { max-width: 34ch; }.hero-field { width: 55%; right: -24%; }
+  .market-search-section { margin: -2.1rem .65rem 0; padding: 1.2rem; }
+  .market-results { padding-top: 3rem; }.market-results-heading { align-items: flex-start; flex-direction: column; }
+  .market-card-grid { grid-template-columns: 1fr; gap: .9rem; }.listing-card { min-height: 205px; }
+  .owner-cta { align-items: flex-start; flex-direction: column; gap: 1rem; }.owner-cta .button { width: 100%; }
+  .market-detail-page { padding-top: 1.5rem; }.market-detail-hero { min-height: 260px; }.detail-field { width: 60%; right: -26%; }
+  .court-detail-heading { align-items: flex-start; flex-direction: column; }.court-prices { width: 100%; }
+  .court-detail-page .booking-layout { display: block; min-height: 0; }.court-detail-page .booking-stage { padding: 1rem 0 13rem; }.court-detail-page .booking-ticket { position: fixed; z-index: 12; inset: auto 0 0; top: auto; height: auto; min-height: 130px; max-height: 72vh; overflow: auto; padding: .85rem 1rem calc(.85rem + env(safe-area-inset-bottom)); border-radius: 10px 10px 0 0; box-shadow: 0 -16px 34px rgba(21,37,33,.16); }.court-detail-page .booking-ticket:not(.has-selection) { display: none; }.court-detail-page .booking-hero h2 { font-size: 2.4rem; }
+  .market-main .auth-intro { min-height: 300px; }
+}
+
+@media (max-width: 480px) {
+  .market-hero { min-height: 350px; }.market-hero h1 { font-size: 3.25rem; }.hero-field { width: 90%; right: -47%; opacity: .55; }
+  .market-search-form { grid-template-columns: 1fr; }.market-search-actions { grid-column: 1; flex-wrap: wrap; }.market-search-actions .button { flex: 1; }
+  .market-view-switch { width: 100%; }.market-view-switch button { flex: 1; }
+  .listing-card { grid-template-columns: 34% 1fr; min-height: 195px; }.listing-illustration { padding: .65rem; }.listing-field { inset: 18% 9%; }.listing-content { padding: 1rem; }.listing-footer strong { font-size: .84rem; }
+  .market-detail-hero { padding: 1.8rem; }.market-detail-hero h1 { font-size: 2.7rem; }
+  .court-detail-page .court-search { grid-template-columns: 1fr; }.court-detail-page .booking-hero h2 { font-size: 2rem; }
+  .court-detail-page .court-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }.court-detail-page .slot-option { padding: .7rem; }.court-detail-page .slot-price { font-size: .82rem; }
+}
+
+@media (max-width: 1100px) {
+  .market-header-inner { width: calc(100% - 2rem); min-height: 64px; }
+  .market-menu-button { display: grid; }
+  .market-nav { position: absolute; top: 100%; left: 0; right: 0; display: none; align-items: stretch; flex-direction: column; gap: .15rem; padding: .9rem 1rem 1.1rem; background: var(--rubber); box-shadow: 0 20px 30px rgba(21,37,33,.25); }
+  .market-nav.is-open { display: flex; }.market-nav-link { padding: .6rem; }.market-account { width: 100%; align-items: stretch; flex-direction: column; gap: .1rem; margin: .4rem 0 0; padding-top: .4rem; border-top: 1px solid #52655e; }.market-account-name { max-width: none; padding: .6rem; }.market-register { justify-content: flex-start; margin-top: .4rem; }
+}
+
+@media (max-width: 780px) {
+  .owner-onboarding, .profile-page, .owner-console { width: calc(100% - 2rem); padding-top: 1.6rem; }
+  .owner-onboarding-hero { padding: 2rem; }.owner-onboarding-hero h1 { font-size: 2.8rem; }.owner-hero-mark { right: -25%; width: 65%; opacity: .55; }
+  .owner-onboarding-layout, .applications-layout { grid-template-columns: 1fr; }.application-detail { position: static; max-height: none; }
+  .membership-assign { align-items: stretch; flex-direction: column; }.membership-assign .button { width: 100%; }
+  .owner-console-hero { padding: 2rem; }.owner-console-hero > svg { width: 40px; }
+}
+
+@media (max-width: 480px) {
+  .owner-onboarding-hero h1 { font-size: 2.35rem; }.owner-apply-panel, .owner-history, .application-detail { padding: 1.1rem; }
+  .owner-history-item-head, .application-row { align-items: flex-start; flex-wrap: wrap; }
+  .admin-page > .filter-bar { flex-wrap: wrap; }.admin-page > .filter-bar span { width: 100%; }
+  .membership-row { align-items: flex-start; flex-wrap: wrap; }.membership-row > div:first-child { flex-basis: 100%; }.membership-actions { width: 100%; }
+  .owner-console-hero h1 { font-size: 2.6rem; }.owner-console-hero > svg { display: none; }
+  .owner-detail-facts { grid-template-columns: 1fr; }.owner-facility-row { padding: 1rem; }
+  .profile-card { grid-template-columns: 1fr; }.profile-card > svg { grid-row: auto; }.profile-links a { width: 100%; }
+}
+
+@media (max-width: 920px) {
+  .owner-price-row { grid-template-columns: 1fr 1fr; }.owner-price-row > .owner-row-actions { grid-column: 1 / -1; }
+}
+
+@media (max-width: 780px) {
+  .owner-section-nav { top: 64px; }.owner-work-section { padding: 1.2rem; }.owner-work-heading { align-items: flex-start; flex-wrap: wrap; }
+  .owner-period-row.with-day { grid-template-columns: 1fr 1fr 40px; }.owner-period-row.with-day .field:first-child { grid-column: 1 / -1; }
+  .owner-inline-confirm .button { flex: 1; }
+}
+
+@media (max-width: 480px) {
+  .owner-work-heading { flex-direction: column; }.owner-work-heading > .button { width: 100%; }
+  .owner-week-board > div { grid-template-columns: 85px minmax(0,1fr); gap: .5rem; padding-inline: .7rem; }
+  .owner-period-row, .owner-period-row.with-day { grid-template-columns: minmax(0,1fr) minmax(0,1fr) 40px; gap: .35rem; }
+  .owner-price-row { grid-template-columns: 1fr; }.owner-price-row > .owner-row-actions, .owner-price-row > .owner-form-error { grid-column: 1; }.owner-price-row > .button { width: 100%; }
+  .owner-court-row { flex-wrap: wrap; }.owner-court-row > div { flex-basis: 100%; }.owner-court-row > svg { display: none; }
+  .owner-data-row > div:first-child { flex-basis: 100%; }.owner-row-actions { width: 100%; }
+}
+
+/* Reservas recibidas: fichas de turno dentro del panel del Propietario. */
+.owner-bookings-entry { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; margin-top: 1.25rem; padding: 1.15rem 1.4rem; background: #e1eae1; border-left: 4px solid var(--court); border-radius: 8px; }
+.owner-bookings-entry > div { display: flex; align-items: center; gap: .85rem; min-width: 0; }
+.owner-bookings-entry > div > svg { flex: 0 0 auto; color: var(--court); }
+.owner-bookings-entry span { display: grid; gap: .2rem; }.owner-bookings-entry strong { font-size: 1.05rem; }.owner-bookings-entry small { color: var(--muted); font-size: .83rem; }
+.owner-bookings-entry .button { flex: 0 0 auto; gap: .55rem; }
+.owner-bookings-page .owner-console-hero h1 { max-width: 22ch; }
+.owner-bookings-filters { margin-top: 1.4rem; padding: 1.5rem; background: var(--white); border: 1px solid var(--rule); border-radius: 10px; }
+.owner-bookings-filter-heading h2 { margin: 0; font-size: 1.35rem; letter-spacing: -.025em; }
+.owner-bookings-filter-heading p { margin: .35rem 0 1.2rem; color: var(--muted); font-size: .83rem; line-height: 1.5; }
+.owner-bookings-filter-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .8rem; }
+.owner-bookings-filter-grid .field { grid-column: span 2; min-width: 0; }
+.owner-bookings-filter-grid .field:nth-last-child(-n+2) { grid-column: span 3; }
+.owner-bookings-filter-grid select, .owner-bookings-filter-grid input { width: 100%; min-width: 0; min-height: 46px; padding: .6rem .75rem; color: var(--rubber); background: var(--paper); border: 1px solid #b8c3bc; border-radius: 8px; }
+.owner-bookings-filters > .button { margin-top: 1rem; }
+.owner-bookings-results { padding-top: 1.8rem; }
+.owner-bookings-list { display: grid; gap: .75rem; }
+.owner-booking-row { display: grid; grid-template-columns: minmax(170px, .8fr) minmax(180px, 1.6fr) minmax(140px, .8fr); min-width: 0; overflow-wrap: anywhere; background: var(--white); border: 1px solid var(--rule); border-radius: 10px; content-visibility: auto; }
+.owner-booking-when { display: grid; align-content: center; gap: .35rem; padding: 1.2rem; color: var(--line); background: var(--court-deep); }
+.owner-booking-when time { text-transform: capitalize; font-size: .81rem; }.owner-booking-when strong { font-size: 1.34rem; font-variant-numeric: tabular-nums; line-height: 1.15; }.owner-booking-when small { color: #cbdfd8; font-size: .71rem; }
+.owner-booking-where { display: grid; align-content: center; gap: .38rem; min-width: 0; padding: 1.15rem 1.4rem; }
+.owner-booking-where h3 { margin: 0; font-size: 1.16rem; letter-spacing: -.02em; }.owner-booking-where p { margin: 0; color: var(--muted); font-size: .88rem; }
+.owner-booking-where > span { display: flex; align-items: center; gap: .35rem; color: var(--court); font-size: .78rem; font-weight: 600; }.owner-booking-where .owner-booking-customer { color: var(--rubber); font-size: .8rem; }
+.owner-booking-outcome { display: grid; align-content: center; justify-items: start; gap: .65rem; min-width: 0; padding: 1.15rem 1.2rem; border-left: 1px solid var(--rule); }
+.owner-booking-outcome strong { font-size: .95rem; font-variant-numeric: tabular-nums; }.owner-booking-outcome small { margin-top: -.5rem; color: var(--muted); font-size: .72rem; }
+.owner-booking-status.status-confirmada { color: #145c48; background: #d9ede3; }.owner-booking-status.status-cancelada { color: #842f2f; background: #f6dfdd; }.owner-booking-status.status-completada { color: #42564b; background: #e2e8df; }
+
+@media (max-width: 780px) {
+  .owner-booking-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+  .owner-booking-outcome { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: .35rem 1rem; padding: .8rem 1.2rem; border-left: 0; border-top: 1px solid var(--rule); }
+  .owner-booking-outcome small { margin: 0; }
+}
+@media (max-width: 560px) {
+  .owner-bookings-entry { align-items: stretch; flex-direction: column; }.owner-bookings-entry .button { justify-content: center; }
+  .owner-bookings-filters { padding: 1rem; }.owner-bookings-filter-grid { grid-template-columns: 1fr; }
+  .owner-bookings-filter-grid .field, .owner-bookings-filter-grid .field:nth-last-child(-n+2) { grid-column: 1; }
+  .owner-booking-row { grid-template-columns: 1fr; }.owner-booking-when { gap: .2rem; padding: .85rem 1rem; }
+  .owner-booking-where { padding: 1rem; }.owner-booking-outcome { grid-column: 1; padding: .8rem 1rem; }
 }

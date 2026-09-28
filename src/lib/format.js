@@ -4,6 +4,35 @@ export function todayInputValue() {
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
+export function todayInTimeZone(timeZone) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    year: 'numeric', month: '2-digit', day: '2-digit', timeZone,
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function formatCOP(priceMinor) {
+  if (priceMinor === null || priceMinor === undefined) return 'Precio no disponible';
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency', currency: 'COP', currencyDisplay: 'code',
+    minimumFractionDigits: 0, maximumFractionDigits: 2,
+  }).format(priceMinor / 100);
+}
+
+export function priceMinorFromCOP(value) {
+  if (value === '') return undefined;
+  const pesos = Number(value);
+  if (!Number.isSafeInteger(pesos) || pesos <= 0 || !Number.isSafeInteger(pesos * 100)) return null;
+  return pesos * 100;
+}
+
+export function sportLabel(code) {
+  if (!code) return 'Deporte no indicado';
+  return code.replaceAll('_', ' ').toLocaleLowerCase('es-CO')
+    .replace(/\b\p{L}/gu, (letter) => letter.toLocaleUpperCase('es-CO'));
+}
+
 export function formatDate(value, options = {}) {
   if (!value) return 'Sin fecha';
   return new Intl.DateTimeFormat('es-CO', {
@@ -41,6 +70,10 @@ export function statusLabel(status) {
   })[status] ?? status;
 }
 
+export function ownerApplicationStatusLabel(status) {
+  return ({ PENDIENTE: 'Pendiente', APROBADA: 'Aprobada', RECHAZADA: 'Rechazada' })[status] ?? status;
+}
+
 export function errorCopy(error) {
   const copies = {
     invalid_credentials: 'El correo o la contraseña no coinciden.',
@@ -49,6 +82,7 @@ export function errorCopy(error) {
     resource_not_found: 'El recurso ya no está disponible o no existe.',
     option_not_available: 'Ese turno dejó de estar disponible. Consulta la fecha de nuevo.',
     booking_conflict: 'Otra persona confirmó un turno incompatible. Actualiza la disponibilidad.',
+    booking_price_changed: 'El precio cambió. Revisa el importe actualizado y elige el turno de nuevo.',
     invalid_booking_option: 'Ese turno ya no cumple la configuración vigente.',
     booking_already_started: 'La reserva ya comenzó y no se puede cancelar.',
     invalid_booking_state: 'El estado actual de la reserva no permite cancelarla.',
@@ -58,6 +92,11 @@ export function errorCopy(error) {
     facility_time_zone_locked: 'La zona horaria no puede cambiar porque ya existe historial operativo.',
     invalid_operational_configuration: 'La configuración no cumple las reglas operativas.',
     origin_not_allowed: 'El origen de esta aplicación no está permitido por el servidor.',
+    owner_application_pending: 'Ya tienes una solicitud pendiente de revisión.',
+    already_owner: 'Tu cuenta ya tiene acceso como Propietario.',
+    invalid_owner_application_state: 'Esta solicitud ya fue decidida. Actualiza la lista antes de continuar.',
+    membership_conflict: 'Ese Usuario no puede asignarse o ya tiene una membresía activa aquí.',
+    rate_limit_exceeded: 'Hay demasiados intentos. Espera un momento antes de volver a intentar.',
   };
   return copies[error?.code] ?? 'No se pudo completar la acción. Revisa los datos e inténtalo de nuevo.';
 }

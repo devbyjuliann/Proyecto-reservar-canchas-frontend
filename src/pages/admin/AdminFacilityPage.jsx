@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { api, apiItems } from '../../api/client.js';
 import { ButtonPending, EmptyState, ErrorNotice, LoadingBlock } from '../../components/Feedback.jsx';
+import { AdminFacilityMemberships } from '../../components/AdminFacilityMemberships.jsx';
 import { AddButton, OperationResult, ResourceLink, Section, StatusDot } from '../../components/Primitives.jsx';
 import { errorCopy } from '../../lib/format.js';
 
@@ -60,6 +61,7 @@ export function AdminFacilityPage() {
         {editor === 'court' ? <CreateCourt facilityId={facilityId} onClose={() => setEditor(null)} onCreated={(court) => navigate(`/admin/canchas/${court.id}`)} /> : null}
         {!courts.length ? <EmptyState title="Esta instalación aún no tiene Canchas">Crea una Cancha con al menos una Duración permitida.</EmptyState> : <div className="resource-list">{courts.map((court) => <ResourceLink key={court.id} to={`/admin/canchas/${court.id}`} title={court.name} meta={`${court.allowedDurationsMinutes.join(', ')} min · Separación ${court.minimumSeparationMinutes} min`} state={court.state} />)}</div>}
       </Section>
+      <AdminFacilityMemberships facilityId={facilityId} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { Eye, EyeOff, LockKeyhole, Mail, UserRound } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../auth/AuthContext.jsx';
@@ -10,15 +10,21 @@ export function AuthPage() {
   const auth = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState(() => location.pathname === '/registro' ? 'register' : 'login');
   const [showPassword, setShowPassword] = useState(false);
   const [values, setValues] = useState({ name: '', email: '', password: '' });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
 
+  useEffect(() => {
+    setMode(location.pathname === '/registro' ? 'register' : 'login');
+    setError(null);
+  }, [location.pathname]);
+
   if (auth.status === 'authenticated') {
-    return <Navigate to={location.state?.from ?? '/'} replace />;
+    return <Navigate to={location.state?.from ?? '/'}
+      state={location.state?.intent ? { intent: location.state.intent } : undefined} replace />;
   }
 
   function update(event) {
@@ -38,7 +44,10 @@ export function AuthPage() {
         setMessage('Cuenta creada. Ingresa con tu correo y contraseña.');
       } else {
         await auth.login({ email: values.email, password: values.password });
-        navigate(location.state?.from ?? '/', { replace: true });
+        navigate(location.state?.from ?? '/', {
+          replace: true,
+          state: location.state?.intent ? { intent: location.state.intent } : undefined,
+        });
       }
     } catch (caught) {
       setError(caught);

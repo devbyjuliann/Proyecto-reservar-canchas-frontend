@@ -32,12 +32,20 @@ export function AuthProvider({ children }) {
     setState({ status: 'anonymous', user: null });
   }
 
+  async function refreshSession() {
+    const { user } = await api('/api/v1/me');
+    setState({ status: 'authenticated', user });
+    return user;
+  }
+
   const value = {
     ...state,
     isAdministrator: state.user?.roles.includes('ADMINISTRADOR') ?? false,
+    isOwner: state.user?.roles.includes('PROPIETARIO') ?? false,
     login,
     register,
     logout,
+    refreshSession,
   };
 
   return <AuthContext value={value}>{children}</AuthContext>;

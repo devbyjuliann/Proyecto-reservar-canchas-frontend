@@ -6,7 +6,7 @@ import { createMySqlPool } from '../../../backend/src/database/pool.js';
 import { createAuthModule, createMySqlAuthAdapter } from '../../../backend/src/modules/auth/index.js';
 import { createSystemClock } from '../../../backend/src/shared/clock.js';
 
-test('ADMINISTRADOR accede y edita el nombre de la Instalación 15', async ({ page }) => {
+test('ADMINISTRADOR accede y edita el nombre de una Instalación existente', async ({ page }) => {
   const config = loadDatabaseConfig();
   if (config.environment !== 'test' || !config.database.endsWith('_test')) {
     throw new Error('El E2E administrativo requiere una base _test');
@@ -17,7 +17,8 @@ test('ADMINISTRADOR accede y edita el nombre de la Instalación 15', async ({ pa
   const pool = createMySqlPool(config);
   try {
     const auth = createAuthModule({ adapter: createMySqlAuthAdapter({ pool }), clock: createSystemClock() });
-    await auth.bootstrapAdministrator({ name: 'Administrador E2E', email, password });
+    const user = await auth.register({ name: 'Administrador E2E', email, password });
+    await pool.execute('INSERT INTO user_roles (user_id, role_code) VALUES (?, ?)', [user.id, 'ADMINISTRADOR']);
   } finally {
     await pool.end();
   }
@@ -28,11 +29,14 @@ test('ADMINISTRADOR accede y edita el nombre de la Instalación 15', async ({ pa
   await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
   await expect(page.getByText('Administrador E2E')).toBeVisible();
 
-  await page.getByRole('link', { name: 'Instalaciones' }).click();
+  await page.getByRole('link', { name: 'Administración' }).click();
   await expect(page.getByRole('heading', { name: 'Instalaciones', exact: true })).toBeVisible();
-  await expect(page.locator('.resource-list .resource-row').first()).toBeVisible();
+  const facilityRow = page.locator('.resource-list .resource-row').first();
+  await expect(facilityRow).toBeVisible();
 
-  await page.goto('/admin/instalaciones/15');
+  const facilityPath = await facilityRow.getAttribute('href');
+  const facilityId = facilityPath?.split('/').pop();
+  await facilityRow.click();
   const originalName = await page.locator('.resource-hero h1').textContent();
   const updatedName = `${originalName} E2E-${randomUUID().slice(0, 8)}`;
   await page.getByRole('button', { name: 'Editar nombre' }).click();
@@ -40,7 +44,7 @@ test('ADMINISTRADOR accede y edita el nombre de la Instalación 15', async ({ pa
   await page.getByRole('button', { name: 'Guardar nombre' }).click();
   await expect(page.locator('.resource-hero h1')).toHaveText(updatedName);
 
-  const response = await page.context().request.get('http://localhost:3000/api/v1/admin/facilities/15');
+  const response = await page.context().request.get(`http://localhost:3000/api/v1/admin/facilities/${facilityId}`);
   expect(response.status()).toBe(200);
   expect((await response.json()).facility.name).toBe(updatedName);
 });

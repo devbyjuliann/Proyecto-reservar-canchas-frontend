@@ -4,7 +4,7 @@ import { startTransition, useEffect, useState } from 'react';
 import { api, withQuery } from '../api/client.js';
 import { EmptyState, ErrorNotice, LoadingBlock } from '../components/Feedback.jsx';
 import { PageHeading } from '../components/Primitives.jsx';
-import { errorCopy, formatInstant, statusLabel } from '../lib/format.js';
+import { errorCopy, formatCOP, formatInstant, statusLabel } from '../lib/format.js';
 
 export function MyBookingsPage() {
   const [items, setItems] = useState([]);
@@ -77,7 +77,7 @@ function BookingRow({ booking, onChanged }) {
   return (
     <article className={`booking-row status-${booking.status.toLowerCase()}`}>
       <time dateTime={booking.startAt}><strong>{new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short', timeZone: booking.timeZone }).format(new Date(booking.startAt))}</strong><span>{new Intl.DateTimeFormat('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: booking.timeZone }).format(new Date(booking.startAt))}</span></time>
-      <div className="booking-place"><h2>{booking.court.name}</h2><p><MapPin size={15} />{booking.facility.name}</p><p><Clock3 size={15} />Hasta {formatInstant(booking.endAt, booking.timeZone, { year: undefined, month: undefined, day: undefined })}</p></div>
+      <div className="booking-place"><h2>{booking.court.name}</h2><p><MapPin size={15} aria-hidden="true" />{booking.facility.name}</p><p><Clock3 size={15} aria-hidden="true" />Hasta {formatInstant(booking.endAt, booking.timeZone, { year: undefined, month: undefined, day: undefined })}</p><p className="booking-price">{formatCOP(booking.priceMinor)}</p></div>
       <span className="booking-status">{statusLabel(booking.status)}</span>
       <div className="booking-actions">
         {cancellable && !confirming ? <button className="button button-quiet button-small" type="button" onClick={() => setConfirming(true)}>Cancelar</button> : null}

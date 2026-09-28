@@ -6,7 +6,7 @@ test('registro → login → /me → logout con sesión real', async ({ page }) 
   const email = `e2e-${randomUUID()}@example.test`;
   const password = 'Contrasena-E2E-2026!';
 
-  await page.goto('http://localhost:5173/acceso');
+  await page.goto('/acceso');
   await page.getByRole('tab', { name: 'Crear cuenta' }).click();
   await page.getByLabel('Nombre').fill(name);
   await page.getByLabel('Correo').fill(email);
@@ -27,5 +27,5 @@ test('registro → login → /me → logout con sesión real', async ({ page }) 
   await expect(page.getByText(name)).toBeVisible();
 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
-  await expect(page.getByRole('link', { name: 'Ingresar' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Iniciar sesión' })).toBeVisible();
 });
