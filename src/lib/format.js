@@ -88,6 +88,7 @@ export function errorCopy(error) {
     invalid_booking_state: 'El estado actual de la reserva no permite cancelarla.',
     email_already_registered: 'Ese correo ya está registrado. Puedes iniciar sesión.',
     resource_inactive: 'El recurso está inactivo y no admite cambios.',
+    facility_not_publishable: 'La Instalación aún no está lista para publicar. Revisa sus datos públicos, una membresía activa de Propietario y una Cancha con duración y precio COP.',
     future_bookings_prevent_deactivation: 'Hay reservas vigentes que impiden la desactivación.',
     facility_time_zone_locked: 'La zona horaria no puede cambiar porque ya existe historial operativo.',
     invalid_operational_configuration: 'La configuración no cumple las reglas operativas.',

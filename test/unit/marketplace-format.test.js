@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { formatCOP, priceMinorFromCOP, sportLabel } from '../../src/lib/format.js';
+import { errorCopy, formatCOP, priceMinorFromCOP, sportLabel } from '../../src/lib/format.js';
 
 test('formats the backend amount in COP and does not invent legacy prices', () => {
   assert.match(formatCOP(9000000), /COP/);
@@ -22,4 +22,9 @@ test('converts a user-entered COP maximum to safe minor units', () => {
 test('renders an API sport code without changing the search identifier', () => {
   assert.equal(sportLabel('FUTBOL_5'), 'Futbol 5');
   assert.equal(sportLabel(null), 'Deporte no indicado');
+});
+
+test('explains a rejected publication without inventing publication rules', () => {
+  assert.match(errorCopy({ code: 'facility_not_publishable' }), /datos públicos/i);
+  assert.match(errorCopy({ code: 'facility_not_publishable' }), /precio COP/i);
 });

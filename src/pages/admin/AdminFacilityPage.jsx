@@ -17,6 +17,8 @@ export function AdminFacilityPage() {
   const [error, setError] = useState(null);
   const [editor, setEditor] = useState(null);
   const [operation, setOperation] = useState(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publicationMessage, setPublicationMessage] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,18 +47,34 @@ export function AdminFacilityPage() {
     } catch (caught) { setError(caught); }
   }
 
+  async function changePublication() {
+    setPublishing(true);
+    setError(null);
+    setPublicationMessage('');
+    try {
+      const published = data.publicationState === 'PUBLISHED';
+      const result = await api(`/api/v1/admin/facilities/${facilityId}/publication`, {
+        method: published ? 'DELETE' : 'POST',
+      });
+      applied(result);
+      setPublicationMessage(published ? 'La Instalación dejó de aparecer en el marketplace.' : 'La Instalación ya aparece en el marketplace.');
+    } catch (caught) { setError(caught); } finally { setPublishing(false); }
+  }
+
   if (loading) return <div className="page-standard"><LoadingBlock lines={7} /></div>;
   if (!data) return <div className="page-standard"><ErrorNotice onRetry={() => navigate('/admin')}>{errorCopy(error)}</ErrorNotice></div>;
 
   return (
     <div className="page-standard admin-page">
       <Link className="back-link" to="/admin"><ArrowLeft size={17} />Instalaciones</Link>
-      <header className="resource-hero"><div><div className="resource-title-line"><h1>{data.name}</h1><StatusDot state={data.state} /></div><p>{data.timeZone} · ID {data.id}</p></div><div className="page-actions"><button className="button button-secondary" type="button" onClick={() => setEditor('details')}>Editar nombre</button><button className="button button-secondary" type="button" onClick={() => setEditor('policy')}><Settings2 size={17} />Política</button>{data.state === 'active' ? <button className="button button-danger-subtle" type="button" onClick={deactivate}><Ban size={17} />Desactivar</button> : null}</div></header>
+      <header className="resource-hero"><div><div className="resource-title-line"><h1>{data.name}</h1><StatusDot state={data.state} /></div><p>{data.timeZone} · ID {data.id}</p></div><div className="page-actions"><button className="button button-secondary" type="button" onClick={() => setEditor('details')}>Editar nombre</button><button className="button button-secondary" type="button" onClick={() => setEditor('policy')}><Settings2 size={17} />Política</button><button className={data.publicationState === 'PUBLISHED' ? 'button button-secondary' : 'button button-primary'} type="button" disabled={publishing} onClick={changePublication}>{publishing ? 'Actualizando publicación' : data.publicationState === 'PUBLISHED' ? 'Despublicar instalación' : 'Publicar instalación'}</button>{data.state === 'active' ? <button className="button button-danger-subtle" type="button" onClick={deactivate}><Ban size={17} />Desactivar</button> : null}</div></header>
       {error ? <ErrorNotice>{errorCopy(error)}</ErrorNotice> : null}
+      {publicationMessage ? <p className="notice notice-success" role="status">{publicationMessage}</p> : null}
       <OperationResult operation={operation} />
       {editor === 'details' ? <FacilityDetails facility={data} onClose={() => setEditor(null)} onSaved={applied} /> : null}
       {editor === 'policy' ? <FacilityPolicy facility={data} onClose={() => setEditor(null)} onSaved={applied} /> : null}
-      <section className="policy-strip" aria-label="Política de reserva"><div><span>Mínimo</span><strong>{data.minimumAdvanceMinutes} min</strong></div><div><span>Máximo</span><strong>{data.maximumAdvanceMinutes} min</strong></div><div><span>Zona horaria</span><strong>{data.timeZone}</strong></div></section>
+      <section className="policy-strip" aria-label="Estado y política de reserva"><div><span>Estado</span><strong>{data.state === 'active' ? 'Activa' : 'Inactiva'}</strong></div><div><span>Publicación</span><strong>{data.publicationState === 'PUBLISHED' ? 'PUBLICADA' : 'BORRADOR'}</strong></div><div><span>Mínimo</span><strong>{data.minimumAdvanceMinutes} min</strong></div><div><span>Máximo</span><strong>{data.maximumAdvanceMinutes} min</strong></div><div><span>Zona horaria</span><strong>{data.timeZone}</strong></div></section>
+      <Section title="Preparación para publicación" description="Información orientativa. El servidor valida los requisitos definitivos al publicar."><div className="definition-grid"><div><dt>Ciudad</dt><dd>{data.city ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Dirección</dt><dd>{data.address ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Descripción</dt><dd>{data.description ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Canchas</dt><dd>{courts.length}</dd></div></div></Section>
       <Section title="Canchas" description="Recursos físicos y su configuración reservable." actions={data.state === 'active' ? <AddButton onClick={() => setEditor('court')}>Nueva cancha</AddButton> : null}>
         {editor === 'court' ? <CreateCourt facilityId={facilityId} onClose={() => setEditor(null)} onCreated={(court) => navigate(`/admin/canchas/${court.id}`)} /> : null}
         {!courts.length ? <EmptyState title="Esta instalación aún no tiene Canchas">Crea una Cancha con al menos una Duración permitida.</EmptyState> : <div className="resource-list">{courts.map((court) => <ResourceLink key={court.id} to={`/admin/canchas/${court.id}`} title={court.name} meta={`${court.allowedDurationsMinutes.join(', ')} min · Separación ${court.minimumSeparationMinutes} min`} state={court.state} />)}</div>}
