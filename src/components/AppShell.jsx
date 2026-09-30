@@ -24,6 +24,7 @@ const userLinks = [
 const adminLinks = [
   { to: '/admin', label: 'Instalaciones', icon: MapPinned },
   { to: '/admin/solicitudes', label: 'Solicitudes de Propietario', icon: ClipboardList },
+  { to: '/admin/propietarios', label: 'Propietarios', icon: Building2 },
   { to: '/admin/conflictos', label: 'Conflictos', icon: ShieldCheck },
 ];
 

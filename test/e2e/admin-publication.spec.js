@@ -22,6 +22,7 @@ test('administrador publica y despublica una instalación preparada', async ({ p
     await page.getByLabel('Correo').fill(fixture.email);
     await page.getByLabel('Contraseña', { exact: true }).fill(fixture.password);
     await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await expect(page.getByRole('link', { name: 'Administración' })).toBeVisible();
     await page.goto(`/admin/instalaciones/${fixture.facilityId}`);
     await expect(page.getByText('BORRADOR', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Publicar instalación' })).toBeVisible();
@@ -29,6 +30,13 @@ test('administrador publica y despublica una instalación preparada', async ({ p
     await page.getByRole('button', { name: 'Publicar instalación' }).click();
     await expect(page.getByText('PUBLICADA', { exact: true })).toBeVisible();
     await expect(page.getByText('La Instalación ya aparece en el marketplace.')).toBeVisible();
+    expect((await page.context().request.get(`http://localhost:3000/api/v1/facilities/${fixture.facilityId}`)).status()).toBe(200);
+    await page.getByRole('button', { name: 'Suspender instalación' }).click();
+    await expect(page.getByText('Suspendida', { exact: true })).toBeVisible();
+    await expect(page.getByText('PUBLICADA', { exact: true })).toBeVisible();
+    expect((await page.context().request.get(`http://localhost:3000/api/v1/facilities/${fixture.facilityId}`)).status()).toBe(404);
+    await page.getByRole('button', { name: 'Reactivar instalación' }).click();
+    await expect(page.locator('.policy-strip').getByText('Activa', { exact: true })).toBeVisible();
     expect((await page.context().request.get(`http://localhost:3000/api/v1/facilities/${fixture.facilityId}`)).status()).toBe(200);
     await page.getByRole('button', { name: 'Despublicar instalación' }).click();
     await expect(page.getByText('BORRADOR', { exact: true })).toBeVisible();

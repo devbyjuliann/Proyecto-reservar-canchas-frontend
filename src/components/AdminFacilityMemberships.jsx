@@ -80,7 +80,7 @@ export function AdminFacilityMemberships({ facilityId }) {
     finally { setPending(false); }
   }
 
-  return <Section title="Propietarios de la Instalación" description="Una aprobación concede el Rol; esta membresía define a qué Instalación puede acceder cada Propietario.">
+  return <Section title="Propietarios de la Instalación" description="La primera membresía se crea con el negocio; estas acciones son para asignaciones excepcionales, Instalaciones históricas y revocaciones.">
     {loading ? <LoadingBlock lines={3} label="Cargando membresías" /> : <>
       {error ? <ErrorNotice onRetry={() => setRefresh((value) => value + 1)}>{errorCopy(error)}</ErrorNotice> : null}
       {loaded ? <>

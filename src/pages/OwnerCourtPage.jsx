@@ -142,7 +142,7 @@ export function OwnerCourtPage() {
     {accessError || error ? <OwnerAccessNotice error={accessError || error} onRetry={() => setRefresh((value) => value + 1)} /> : null}
     {court && facility && !accessLost.current ? <>
       <header className="owner-console-hero"><div><span className="owner-console-label">{facility.name}</span><h1>{court.name}</h1><p>{court.description || 'Completa la descripción de esta Cancha desde General.'}</p><span className="owner-court-location"><MapPin size={16} aria-hidden="true" />{facility.city || 'Ciudad por definir'} · {facility.timeZone}</span></div><span className={`owner-state ${court.state === 'active' ? 'state-aprobada' : 'state-rechazada'}`}>{court.state === 'active' ? 'Activa' : 'Inactiva'}</span></header>
-      <nav className="owner-section-nav" aria-label="Secciones de la Cancha">{sections.map((item) => <button key={item.key} type="button" aria-pressed={section === item.key} onClick={() => { setSection(item.key); setMessage(''); }}>{item.label}</button>)}</nav>
+       <nav className="owner-section-nav" aria-label="Secciones de la Cancha">{sections.map((item) => <button key={item.key} type="button" aria-pressed={section === item.key} onClick={() => { sectionController.current?.abort(); setData(null); setSection(item.key); setMessage(''); }}>{item.label}</button>)}</nav>
       <div className="owner-console-body owner-court-content">
         {message ? <p className="notice notice-success" role="status">{message}</p> : null}
         {sectionError ? <OwnerAccessNotice error={sectionError} onRetry={() => setSectionRefresh((value) => value + 1)} /> : null}

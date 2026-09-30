@@ -8,6 +8,8 @@ import { AdminCourtPage } from './pages/admin/AdminCourtPage.jsx';
 import { AdminFacilitiesPage } from './pages/admin/AdminFacilitiesPage.jsx';
 import { AdminFacilityPage } from './pages/admin/AdminFacilityPage.jsx';
 import { AdminOwnerApplicationsPage } from './pages/admin/AdminOwnerApplicationsPage.jsx';
+import { AdminOwnersPage } from './pages/admin/AdminOwnersPage.jsx';
+import { AdminOwnerPage } from './pages/admin/AdminOwnerPage.jsx';
 import { AuthPage } from './pages/AuthPage.jsx';
 import { CourtDetailPage } from './pages/CourtDetailPage.jsx';
 import { FacilityDetailPage } from './pages/FacilityDetailPage.jsx';
@@ -42,6 +44,8 @@ export function App() {
         <Route path="/admin/canchas/:courtId" element={<RequireAdmin><AdminCourtPage /></RequireAdmin>} />
         <Route path="/admin/conflictos" element={<RequireAdmin><AdminConflictsPage /></RequireAdmin>} />
         <Route path="/admin/solicitudes" element={<RequireAdmin><AdminOwnerApplicationsPage /></RequireAdmin>} />
+        <Route path="/admin/propietarios" element={<RequireAdmin><AdminOwnersPage /></RequireAdmin>} />
+        <Route path="/admin/propietarios/:ownerId" element={<RequireAdmin><AdminOwnerPage /></RequireAdmin>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
