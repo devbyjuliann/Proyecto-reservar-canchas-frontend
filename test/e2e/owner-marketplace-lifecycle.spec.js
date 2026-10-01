@@ -49,6 +49,8 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await login(page, owner);
     await expect(page.getByRole('link', { name: 'Mi negocio' })).toBeVisible();
     await page.goto('/owner');
+    await expect(page.getByText('Todavía no tienes un negocio registrado.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Crear negocio' })).toBeVisible();
     await page.getByRole('button', { name: 'Nueva Instalación' }).click();
     const creation = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/v1/owner/facilities' && r.request().method() === 'POST');
     await page.getByRole('form', { name: 'Crear Instalación' }).getByLabel('Nombre').fill(name);
@@ -63,6 +65,26 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     expect(result.membership).toMatchObject({ userId: ids.owner, facilityId: ids.facility, active: true });
     await expect(page.getByRole('heading', { name })).toBeVisible();
     await expect(page.getByText('BORRADOR', { exact: true })).toBeVisible();
+    await page.goto('/owner');
+    await expect(page.getByText('Preparación para publicar')).toBeVisible();
+    await expect(page.getByText('Crea tu primera Cancha para continuar.')).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({ path: 'test-results/owner-overview-desktop.png', fullPage: true });
+    await page.setViewportSize({ width: 768, height: 900 });
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectNoHorizontalOverflow(page);
+    await expect(page.getByRole('link', { name: 'Crear Cancha' })).toBeVisible();
+    await page.screenshot({ path: 'test-results/owner-overview-mobile.png', fullPage: true });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.getByRole('link', { name: 'Crear Cancha' }).click();
+    await expect(page.getByText('Este negocio aún no tiene Canchas')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Crear Cancha' })).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole('navigation', { name: 'Secciones de Mi negocio' }).getByRole('link', { name: 'Canchas' }).click();
+    await expect(page.getByText('Este negocio aún no tiene Canchas')).toBeVisible();
+    await page.setViewportSize({ width: 1280, height: 900 });
 
     await page.getByRole('button', { name: 'Nueva Cancha' }).click();
     await page.getByLabel('Nombre de la Cancha').fill(`Cancha ${unique}`);
@@ -72,15 +94,27 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await expect(page).toHaveURL(/\/owner\/canchas\/\d+$/);
     ids.court = page.url().split('/').pop();
 
-    await page.getByRole('button', { name: 'Precios', exact: true }).click();
+    await page.goto('/owner');
+    await expect(page.getByText('Configura las tarifas de tu Cancha.')).toBeVisible();
+    await page.getByRole('link', { name: 'Configurar tarifas' }).click();
+    await expect(page.getByRole('heading', { name: 'Tarifas' })).toBeVisible();
     await page.getByLabel('Precio para 60 minutos (COP)').fill('50000');
     await page.getByRole('button', { name: 'Establecer precio' }).click();
     await expect(page.getByText('Precio en COP guardado.')).toBeVisible();
     const future = new Date(`${todayInTimeZone('America/Bogota')}T12:00:00.000Z`);
     future.setUTCDate(future.getUTCDate() + 3);
     const date = future.toISOString().slice(0, 10);
-    await page.getByRole('button', { name: 'Horarios', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Horario semanal' })).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole('navigation', { name: 'Secciones de la Cancha' }).getByRole('button', { name: 'Horario habitual' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Horario habitual' })).toBeVisible();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/owner');
+    await expect(page.getByText('Define cuándo estará disponible tu Cancha.')).toBeVisible();
+    await page.getByRole('link', { name: 'Definir horario' }).click();
+    await expect(page.getByRole('heading', { name: 'Horario habitual' })).toBeVisible();
+    await expect(page.getByText('Esta Cancha todavía no tiene horarios habituales.', { exact: false })).toBeVisible();
     await page.getByRole('button', { name: 'Editar horario' }).click();
     await page.getByRole('button', { name: 'Agregar Franja' }).click();
     await page.getByLabel('Día').selectOption(String(future.getUTCDay() || 7));
@@ -89,6 +123,8 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await page.getByRole('button', { name: 'Reemplazar horario' }).click();
     await page.getByRole('button', { name: 'Confirmar reemplazo' }).click();
     await expect(page.getByText('Horario semanal actualizado.')).toBeVisible();
+    await page.goto('/owner');
+    await expect(page.getByText('Tu negocio está preparado. Falta la revisión y publicación del Administrador.')).toBeVisible();
     await logout(page);
 
     await login(page, admin);
@@ -130,6 +166,9 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await logout(page);
     await login(page, owner);
     await expect(page.getByRole('link', { name: 'Mi negocio' })).toBeVisible();
+    await page.goto('/owner');
+    await expect(page.getByText('PUBLICADA', { exact: true })).toBeVisible();
+    await expect(page.getByText('Tu negocio está publicado y visible en el marketplace.')).toBeVisible();
     await page.goto('/owner/reservas');
     const row = page.locator('.owner-booking-row').filter({ hasText: `Reserva #${ids.booking}` });
     await expect(row).toContainText(name);
@@ -153,6 +192,7 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await login(page, owner);
     await page.goto('/owner');
     await expect(page.getByText(/Tu acceso como Propietario está suspendido/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Nueva Instalación' })).toHaveCount(0);
     const blocked = await page.context().request.get(`${API}/api/v1/owner/facilities`);
     expect(blocked.status()).toBe(403);
     expect((await blocked.json()).error.code).toBe('owner_suspended');
@@ -188,7 +228,7 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await login(page, owner);
     await page.goto('/owner');
     await expect(page.getByRole('heading', { name: 'Mi negocio' })).toBeVisible();
-    await expect(page.locator('.owner-facility-row').filter({ hasText: name })).toBeVisible();
+    await expect(page.locator('.owner-dashboard-facility').filter({ hasText: name })).toBeVisible();
   } finally {
     try { await clean(pool, ids); } finally { await pool.end(); }
   }
@@ -215,6 +255,13 @@ async function login(page, credentials) {
 async function logout(page) {
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await expect(page.getByRole('link', { name: 'Iniciar sesión' })).toBeVisible();
+}
+
+async function expectNoHorizontalOverflow(page) {
+  const { viewport, content } = await page.evaluate(() => ({
+    viewport: window.innerWidth, content: document.documentElement.scrollWidth,
+  }));
+  expect(content).toBeLessThanOrEqual(viewport + 1);
 }
 
 async function clean(pool, ids) {

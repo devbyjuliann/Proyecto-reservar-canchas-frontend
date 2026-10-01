@@ -1,6 +1,6 @@
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 
 import { api, withQuery } from '../api/client.js';
 import { LoadingBlock } from '../components/Feedback.jsx';
@@ -11,20 +11,22 @@ import {
 } from '../components/OwnerCourtSections.jsx';
 
 const sections = [
-  { key: 'general', label: 'General' },
-  { key: 'configuration', label: 'Configuración' },
-  { key: 'schedule', label: 'Horarios' },
+  { key: 'general', label: 'Información' },
+  { key: 'configuration', label: 'Duraciones' },
+  { key: 'schedule', label: 'Horario habitual' },
   { key: 'exceptions', label: 'Excepciones' },
   { key: 'unavailabilities', label: 'Bloqueos' },
-  { key: 'prices', label: 'Precios' },
+  { key: 'prices', label: 'Tarifas' },
 ];
 
 export function OwnerCourtPage() {
   const { courtId } = useParams();
+  const location = useLocation();
   const base = `/api/v1/owner/courts/${courtId}`;
   const [court, setCourt] = useState(null);
   const [facility, setFacility] = useState(null);
-  const [section, setSection] = useState('general');
+  const [section, setSection] = useState(() => sections.some((item) => item.key === location.state?.section)
+    ? location.state.section : 'general');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sectionLoading, setSectionLoading] = useState(false);
@@ -136,13 +138,21 @@ export function OwnerCourtPage() {
     finally { setPending(false); }
   }
 
+  function selectSection(next) {
+    if (section === next) return;
+    sectionController.current?.abort();
+    setData(null);
+    setSection(next);
+    setMessage('');
+  }
+
   return <div className="owner-console owner-court-page">
     <Link className="back-link" to={court ? `/owner/instalaciones/${court.facility.id}` : '/owner'}><ArrowLeft size={17} aria-hidden="true" />Volver a la Instalación</Link>
     {loading ? <LoadingBlock lines={5} label="Cargando Cancha" /> : null}
     {accessError || error ? <OwnerAccessNotice error={accessError || error} onRetry={() => setRefresh((value) => value + 1)} /> : null}
     {court && facility && !accessLost.current ? <>
       <header className="owner-console-hero"><div><span className="owner-console-label">{facility.name}</span><h1>{court.name}</h1><p>{court.description || 'Completa la descripción de esta Cancha desde General.'}</p><span className="owner-court-location"><MapPin size={16} aria-hidden="true" />{facility.city || 'Ciudad por definir'} · {facility.timeZone}</span></div><span className={`owner-state ${court.state === 'active' ? 'state-aprobada' : 'state-rechazada'}`}>{court.state === 'active' ? 'Activa' : 'Inactiva'}</span></header>
-       <nav className="owner-section-nav" aria-label="Secciones de la Cancha">{sections.map((item) => <button key={item.key} type="button" aria-pressed={section === item.key} onClick={() => { sectionController.current?.abort(); setData(null); setSection(item.key); setMessage(''); }}>{item.label}</button>)}</nav>
+       <nav className="owner-section-nav" aria-label="Secciones de la Cancha"><div className="owner-nav-group" role="group" aria-label="Información"><button type="button" aria-pressed={section === 'general'} onClick={() => selectSection('general')}>Información</button></div><div className="owner-nav-group" role="group" aria-label="Disponibilidad"><span>Disponibilidad</span>{sections.filter((item) => ['configuration', 'schedule', 'exceptions', 'unavailabilities'].includes(item.key)).map((item) => <button key={item.key} type="button" aria-pressed={section === item.key} onClick={() => selectSection(item.key)}>{item.label}</button>)}</div><div className="owner-nav-group" role="group" aria-label="Tarifas"><span>Tarifas</span><button type="button" aria-pressed={section === 'prices'} onClick={() => selectSection('prices')}>Tarifas</button></div></nav>
       <div className="owner-console-body owner-court-content">
         {message ? <p className="notice notice-success" role="status">{message}</p> : null}
         {sectionError ? <OwnerAccessNotice error={sectionError} onRetry={() => setSectionRefresh((value) => value + 1)} /> : null}

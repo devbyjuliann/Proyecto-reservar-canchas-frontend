@@ -142,7 +142,7 @@ test('onboarding real: solicitud → aprobación → membresía → Mi negocio',
     await expect(page.getByText(unassignedFacility[0].name)).toHaveCount(0);
     const foreign = await page.context().request.get(`${BACKEND}/api/v1/owner/facilities/${unassignedId}`);
     expect(foreign.status()).toBe(404);
-    await page.locator('.owner-facility-row').filter({ hasText: assignedFacility[0].name }).click();
+    await page.locator('.owner-dashboard-facility').filter({ hasText: assignedFacility[0].name }).getByRole('link', { name: 'Abrir negocio' }).click();
     await expect(page).toHaveURL(new RegExp(`/owner/instalaciones/${assignedId}$`));
     await expect(page.getByRole('heading', { name: assignedFacility[0].name })).toBeVisible();
   } finally {

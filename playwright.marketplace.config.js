@@ -1,9 +1,15 @@
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
 
 import { defineConfig } from '@playwright/test';
 
 const frontend = fileURLToPath(new URL('./', import.meta.url));
 const backend = fileURLToPath(new URL('../backend/', import.meta.url));
+const backendTestEnv = new URL('../backend/.env.test.local', import.meta.url);
+
+if (existsSync(backendTestEnv)) {
+  process.loadEnvFile?.(backendTestEnv);
+}
 
 export default defineConfig({
   testDir: './test/e2e',

@@ -53,7 +53,7 @@ test('owner real: configuración, horario y precio hasta el marketplace público
     expect(facilityResponse.status()).toBe(200);
     expect((await facilityResponse.json()).items.map((item) => item.id)).toEqual([facilityId]);
     const facilityName = (await (await api.get(`${BACKEND}/api/v1/owner/facilities/${facilityId}`)).json()).facility.name;
-    await page.locator('.owner-facility-row').filter({ hasText: facilityName }).click();
+    await page.locator('.owner-dashboard-facility').filter({ hasText: facilityName }).getByRole('link', { name: 'Abrir negocio' }).click();
     await expect(page.getByRole('heading', { name: facilityName })).toBeVisible();
     const courtName = (await (await api.get(`${BACKEND}/api/v1/owner/courts/${courtId}`)).json()).court.name;
     await page.locator('.owner-court-row').filter({ hasText: courtName }).click();
@@ -74,8 +74,8 @@ test('owner real: configuración, horario y precio hasta el marketplace público
     };
     expect(original.price.priceMinor).toBe(INITIAL_PRICE);
 
-    await page.getByRole('button', { name: 'Configuración', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Configuración de Reserva' })).toBeVisible();
+    await page.getByRole('button', { name: 'Duraciones', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Configuración de Reservas' })).toBeVisible();
     const nextSeparation = original.configuration.minimumSeparationMinutes + 1;
     modified.configuration = true;
     await page.getByLabel('Separación mínima (minutos)').fill(String(nextSeparation));
@@ -84,8 +84,8 @@ test('owner real: configuración, horario y precio hasta el marketplace público
 
     await page.reload();
     await expect(page.getByRole('heading', { name: courtName })).toBeVisible();
-    await page.getByRole('button', { name: 'Horarios', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Horario semanal' })).toBeVisible({ timeout: 30_000 });
+    await page.getByRole('button', { name: 'Horario habitual', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Horario habitual' })).toBeVisible({ timeout: 30_000 });
     await page.getByRole('button', { name: 'Editar horario' }).click();
     modified.schedule = true;
     await page.getByLabel('Fin', { exact: true }).fill('21:00');
@@ -95,25 +95,25 @@ test('owner real: configuración, horario y precio hasta el marketplace público
 
     await page.reload();
     await expect(page.getByRole('heading', { name: courtName })).toBeVisible();
-    await page.getByRole('button', { name: 'Precios', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Precios por Duración' })).toBeVisible({ timeout: 30_000 });
+    await page.getByRole('button', { name: 'Tarifas', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Tarifas' })).toBeVisible({ timeout: 30_000 });
     modified.price = true;
     await page.getByLabel('Precio para 60 minutos (COP)').fill('92000');
     await page.getByRole('button', { name: 'Actualizar precio' }).click();
     await expect(page.getByText('Precio en COP guardado.')).toBeVisible();
 
     await page.reload();
-    await page.getByRole('button', { name: 'Configuración', exact: true }).click();
+    await page.getByRole('button', { name: 'Duraciones', exact: true }).click();
     await expect(page.getByLabel('Separación mínima (minutos)')).toHaveValue(String(nextSeparation));
     await page.reload();
     await expect(page.getByRole('heading', { name: courtName })).toBeVisible();
-    await page.getByRole('button', { name: 'Horarios', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Horario semanal' })).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText('08:00–21:00')).toBeVisible();
+    await page.getByRole('button', { name: 'Horario habitual', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Horario habitual' })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('08:00 – 21:00')).toBeVisible();
     await page.reload();
     await expect(page.getByRole('heading', { name: courtName })).toBeVisible();
-    await page.getByRole('button', { name: 'Precios', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Precios por Duración' })).toBeVisible({ timeout: 30_000 });
+    await page.getByRole('button', { name: 'Tarifas', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Tarifas' })).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(formatCOP(UPDATED_PRICE))).toBeVisible();
 
     const persistedConfig = (await (await api.get(configurationPath)).json());

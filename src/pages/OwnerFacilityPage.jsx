@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { api, withQuery } from '../api/client.js';
-import { EmptyState, ErrorNotice, LoadingBlock } from '../components/Feedback.jsx';
+import { EmptyState, LoadingBlock } from '../components/Feedback.jsx';
 import { isOwnerAccessLost, OwnerAccessNotice } from '../components/OwnerAccessNotice.jsx';
-import { errorCopy, formatInstant, sportLabel } from '../lib/format.js';
+import { errorCopy, formatCOP, formatInstant, sportLabel } from '../lib/format.js';
 import { parseDurations } from '../lib/owner-forms.js';
 
 export function OwnerFacilityPage() {
@@ -17,6 +17,8 @@ export function OwnerFacilityPage() {
   const [cursor, setCursor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [priceSummary, setPriceSummary] = useState({});
+  const [deactivating, setDeactivating] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
   const [editor, setEditor] = useState(null);
@@ -59,6 +61,26 @@ export function OwnerFacilityPage() {
     return () => controller.abort();
   }, [facilityId, refresh]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    setPriceSummary({});
+    if (!courts.length || accessLost.current) return () => controller.abort();
+    Promise.all(courts.filter((court) => court.state === 'active').map(async (court) => {
+      try {
+        const result = await api(`/api/v1/owner/courts/${court.id}/prices`, { signal: controller.signal });
+        const amounts = result.items.filter((price) => price.currency === 'COP' && price.priceMinor > 0)
+          .map((price) => price.priceMinor);
+        return [court.id, amounts.length ? Math.min(...amounts) : null];
+      } catch (caught) {
+        if (caught.name === 'AbortError' || isOwnerAccessLost(caught)) throw caught;
+        return [court.id, undefined];
+      }
+    })).then((results) => {
+      if (!controller.signal.aborted) setPriceSummary(Object.fromEntries(results));
+    }).catch((caught) => { if (caught.name !== 'AbortError') handleError(caught); });
+    return () => controller.abort();
+  }, [courts]);
+
   async function loadMore() {
     if (!cursor || loadingMore) return;
     const controller = new AbortController();
@@ -83,7 +105,8 @@ export function OwnerFacilityPage() {
       setEditor(null);
       setError(null);
       setMessage(result.operation.changed ? 'Datos de la Instalación guardados.' : 'La ficha ya tenía estos valores.');
-    } catch (caught) { handleError(caught); }
+      return null;
+    } catch (caught) { if (isOwnerAccessLost(caught)) handleError(caught); return caught; }
   }
 
   async function savePolicy(values) {
@@ -94,17 +117,21 @@ export function OwnerFacilityPage() {
       setEditor(null);
       setError(null);
       setMessage('Política de Reserva actualizada. Las Canchas aplicarán la nueva ventana.');
-    } catch (caught) { handleError(caught); }
+      return null;
+    } catch (caught) { if (isOwnerAccessLost(caught)) handleError(caught); return caught; }
   }
 
   async function createCourt(values) {
     try {
       const result = await api(`${path}/courts`, { method: 'POST', body: values });
       navigate(`/owner/canchas/${result.court.id}`);
-    } catch (caught) { handleError(caught); }
+      return null;
+    } catch (caught) { if (isOwnerAccessLost(caught)) handleError(caught); return caught; }
   }
 
   async function deactivate() {
+    if (deactivating) return;
+    setDeactivating(true);
     try {
       await api(`${path}/deactivation`, { method: 'POST' });
       const detail = await api(path);
@@ -113,28 +140,32 @@ export function OwnerFacilityPage() {
       setError(null);
       setMessage('Instalación desactivada. Ya no se ofrecerá para nuevas Reservas.');
     } catch (caught) { handleError(caught); }
+    finally { setDeactivating(false); }
   }
+
+  const primaryCourt = courts.find((court) => court.state === 'active');
 
   return <div className="owner-console owner-facility-detail"><Link className="back-link" to="/owner"><ArrowLeft size={17} aria-hidden="true" />Volver a Mi negocio</Link>
     {loading ? <LoadingBlock lines={5} label="Cargando Instalación y Canchas" /> : null}
     {error ? <OwnerAccessNotice error={error} onRetry={() => setRefresh((value) => value + 1)} /> : null}
-    {facility ? <><header className="owner-console-hero"><div><span className="owner-console-label">Instalación asignada</span><h1>{facility.name}</h1><p>{facility.description || 'Completa la descripción de tu negocio para preparar su ficha.'}</p></div><Building2 size={56} strokeWidth={1.3} aria-hidden="true" /></header>
-       <div className="owner-console-body"><div className="owner-facility-states"><span className={`owner-state ${facility.state === 'active' ? 'state-aprobada' : 'state-rechazada'}`}>{facility.state === 'active' ? 'Activa' : 'Suspendida'}</span><span className={`owner-state ${facility.publicationState === 'PUBLISHED' ? 'state-aprobada' : 'state-pendiente'}`}>{facility.publicationState === 'PUBLISHED' ? 'PUBLICADA' : 'BORRADOR'}</span></div>{facility.publicationState !== 'PUBLISHED' ? <p className="quiet-copy">Esta Instalación aún no aparece en el marketplace. Un Administrador revisará y decidirá su publicación cuando la ficha y las Canchas estén listas.</p> : null}
+    {facility ? <><header className="owner-console-hero"><div><span className="owner-console-label">Mi negocio / Instalación</span><h1>{facility.name}</h1><p>{facility.description || 'Completa la descripción de tu negocio para preparar su ficha.'}</p></div><Building2 size={56} strokeWidth={1.3} aria-hidden="true" /></header>
+       <nav className="owner-section-nav owner-facility-nav" aria-label="Secciones de Mi negocio"><Link to="#informacion">Información</Link><Link to="#canchas">Canchas</Link><Link to={primaryCourt ? `/owner/canchas/${primaryCourt.id}` : '#canchas'} state={{ section: 'schedule' }}>Disponibilidad</Link><Link to={primaryCourt ? `/owner/canchas/${primaryCourt.id}` : '#canchas'} state={{ section: 'prices' }}>Tarifas</Link><Link to="/owner/reservas">Reservas</Link></nav>
+       <div className="owner-console-body"><div className="owner-facility-states"><span className={`owner-state ${facility.state === 'active' ? 'state-aprobada' : 'state-rechazada'}`}>{facility.state === 'active' ? 'Activa' : 'Suspendida'}</span><span className={`owner-state ${facility.publicationState === 'PUBLISHED' ? 'state-aprobada' : 'state-pendiente'}`}>{facility.publicationState === 'PUBLISHED' ? 'PUBLICADA' : 'BORRADOR'}</span></div>{facility.publicationState !== 'PUBLISHED' ? <p className="quiet-copy">Este negocio todavía no aparece en el marketplace. <Link to="/owner">Consulta qué te falta preparar</Link>; el Administrador decide cuándo publicarlo.</p> : <p className="quiet-copy">Negocio publicado. Consulta las <Link to="/owner/reservas">Reservas recibidas</Link> o sigue configurando tus Canchas.</p>}
         {message ? <p className="notice notice-success" role="status">{message}</p> : null}
-        <section className="owner-work-section" aria-labelledby="owner-facility-data"><div className="owner-work-heading"><div><h2 id="owner-facility-data">Datos del establecimiento</h2><p>El Administrador decide la publicación; aquí preparas la ficha.</p></div>{facility.state === 'active' ? <button className="button button-quiet button-small" type="button" onClick={() => { setEditor(editor === 'details' ? null : 'details'); setError(null); }}>Editar datos</button> : null}</div>
-          <dl className="owner-detail-facts"><div><dt>Ciudad</dt><dd>{facility.city || 'Por definir'}</dd></div><div><dt>Dirección</dt><dd><MapPin size={15} aria-hidden="true" />{facility.address || 'Por definir'}</dd></div><div><dt>Zona horaria</dt><dd>{facility.timeZone}</dd></div>{facility.publishedAt ? <div><dt>Última publicación</dt><dd>{formatInstant(facility.publishedAt)}</dd></div> : null}</dl>
+         <section id="informacion" className="owner-work-section" aria-labelledby="owner-facility-data"><div className="owner-work-heading"><div><h2 id="owner-facility-data">Información del negocio</h2><p>Nombre, ciudad, dirección y descripción de la ficha que verán tus clientes.</p></div>{facility.state === 'active' ? <button className="button button-quiet button-small" type="button" onClick={() => { setEditor(editor === 'details' ? null : 'details'); setError(null); }}>Editar información</button> : null}</div>
+           <dl className="owner-detail-facts"><div><dt>Ciudad</dt><dd>{facility.city || 'Por definir'}</dd></div><div><dt>Dirección</dt><dd><MapPin size={15} aria-hidden="true" />{facility.address || 'Por definir'}</dd></div><div><dt>Descripción</dt><dd>{facility.description || 'Por definir'}</dd></div><div><dt>Zona horaria</dt><dd>{facility.timeZone}</dd></div>{facility.publishedAt ? <div><dt>Última publicación</dt><dd>{formatInstant(facility.publishedAt)}</dd></div> : null}</dl>
           {editor === 'details' ? <FacilityDetailsForm facility={facility} onSave={saveDetails} onClose={() => setEditor(null)} /> : null}
         </section>
-        <section className="owner-work-section" aria-labelledby="owner-policy-heading"><div className="owner-work-heading"><div><h2 id="owner-policy-heading">Política de Reserva</h2><p>Define la ventana de anticipación compartida por las Canchas.</p></div>{facility.state === 'active' ? <button className="button button-quiet button-small" type="button" onClick={() => { setEditor(editor === 'policy' ? null : 'policy'); setError(null); }}>Editar política</button> : null}</div>
+         <section className="owner-work-section" aria-labelledby="owner-policy-heading"><div className="owner-work-heading"><div><h2 id="owner-policy-heading">Anticipación de Reservas</h2><p>Define con cuánta anticipación pueden reservar los clientes en tus Canchas. Aquí también se ajusta la zona horaria, si aún está permitida su edición.</p></div>{facility.state === 'active' ? <button className="button button-quiet button-small" type="button" onClick={() => { setEditor(editor === 'policy' ? null : 'policy'); setError(null); }}>Editar zona y anticipación</button> : null}</div>
           <div className="owner-policy-facts"><div><span>Anticipación mínima</span><strong>{facility.minimumAdvanceMinutes} min</strong></div><div><span>Anticipación máxima</span><strong>{facility.maximumAdvanceMinutes} min</strong></div></div>
           {editor === 'policy' ? <PolicyForm facility={facility} onSave={savePolicy} onClose={() => setEditor(null)} /> : null}
         </section>
-        <section className="owner-work-section" aria-labelledby="owner-courts-heading"><div className="owner-work-heading"><div><h2 id="owner-courts-heading">Canchas</h2><p>Configura cada Cancha desde su propia ficha operativa.</p></div>{facility.state === 'active' ? <button className="button button-secondary button-small" type="button" onClick={() => { setEditor(editor === 'court' ? null : 'court'); setError(null); }}><Plus size={16} aria-hidden="true" />Nueva Cancha</button> : null}</div>
+         <section id="canchas" className="owner-work-section" aria-labelledby="owner-courts-heading"><div className="owner-work-heading"><div><h2 id="owner-courts-heading">Canchas</h2><p>Abre una Cancha para editar deporte, horarios, duraciones y tarifas.</p></div>{facility.state === 'active' ? <button className="button button-secondary button-small" type="button" onClick={() => { setEditor(editor === 'court' ? null : 'court'); setError(null); }}><Plus size={16} aria-hidden="true" />Nueva Cancha</button> : null}</div>
           {editor === 'court' ? <CreateCourtForm onSave={createCourt} onClose={() => setEditor(null)} /> : null}
-          {!courts.length ? <EmptyState title="Aún no tienes Canchas en esta Instalación">Crea la primera Cancha con al menos una Duración permitida.</EmptyState> : <div className="owner-courts-list">{courts.map((court) => <Link className="owner-court-row" key={court.id} to={`/owner/canchas/${court.id}`}><div><strong>{court.name}</strong><span>{sportLabel(court.sportCode)} · {court.allowedDurationsMinutes.join(', ')} min</span></div><span className={`owner-state ${court.state === 'active' ? 'state-aprobada' : 'state-rechazada'}`}>{court.state === 'active' ? 'Activa' : 'Inactiva'}</span><ArrowRight size={19} aria-hidden="true" /></Link>)}</div>}
+           {!courts.length ? <EmptyState icon={Building2} title="Este negocio aún no tiene Canchas" action={facility.state === 'active' && editor !== 'court' ? <button className="button button-primary" type="button" onClick={() => setEditor('court')}>Crear Cancha</button> : null}>Crea la primera para configurar horarios y precios y comenzar a recibir Reservas.</EmptyState> : <div className="owner-courts-list">{courts.map((court) => <Link className="owner-court-row" key={court.id} to={`/owner/canchas/${court.id}`}><div><strong>{court.name}</strong><span>{sportLabel(court.sportCode)} · {court.allowedDurationsMinutes.join(', ')} min</span><span className={priceSummary[court.id] === null ? 'price-pending' : ''}>{court.state !== 'active' ? 'Cancha inactiva' : !Object.hasOwn(priceSummary, court.id) ? 'Consultando tarifas' : priceSummary[court.id] === undefined ? 'Tarifa sin comprobar' : priceSummary[court.id] === null ? 'Precio pendiente' : `Desde ${formatCOP(priceSummary[court.id])}`}</span></div><span className={`owner-state ${court.state === 'active' ? 'state-aprobada' : 'state-rechazada'}`}>{court.state === 'active' ? 'Activa' : 'Inactiva'}</span><ArrowRight size={19} aria-hidden="true" /></Link>)}</div>}
           {cursor ? <button className="button button-quiet load-more" type="button" disabled={loadingMore} onClick={loadMore}>{loadingMore ? 'Cargando' : 'Ver más Canchas'}</button> : null}
         </section>
-        {facility.state === 'active' ? <section className="owner-work-section owner-danger-zone" aria-labelledby="owner-deactivate-heading"><h2 id="owner-deactivate-heading">Desactivar Instalación</h2><p>Solo es posible si las reglas de Reservas vigentes lo permiten. No se cancelan Reservas automáticamente.</p>{confirmDeactivate ? <div className="owner-inline-confirm"><strong>¿Desactivar esta Instalación?</strong><button className="button button-danger" type="button" onClick={deactivate}>Sí, desactivar</button><button className="button button-quiet" type="button" onClick={() => setConfirmDeactivate(false)}>Conservar</button></div> : <button className="button button-danger-subtle" type="button" onClick={() => setConfirmDeactivate(true)}><Ban size={16} aria-hidden="true" />Desactivar Instalación</button>}</section> : null}
+         {facility.state === 'active' ? <section className="owner-work-section owner-danger-zone" aria-labelledby="owner-deactivate-heading"><h2 id="owner-deactivate-heading">Desactivar Instalación</h2><p>Solo es posible si las reglas de Reservas vigentes lo permiten. No se cancelan Reservas automáticamente.</p>{confirmDeactivate ? <div className="owner-inline-confirm"><strong>¿Desactivar esta Instalación?</strong><button className="button button-danger" type="button" disabled={deactivating} onClick={deactivate}>{deactivating ? 'Desactivando' : 'Sí, desactivar'}</button><button className="button button-quiet" type="button" disabled={deactivating} onClick={() => setConfirmDeactivate(false)}>Conservar</button></div> : <button className="button button-danger-subtle" type="button" onClick={() => setConfirmDeactivate(true)}><Ban size={16} aria-hidden="true" />Desactivar Instalación</button>}</section> : null}
       </div>
     </> : null}
   </div>;
@@ -147,6 +178,7 @@ function FacilityDetailsForm({ facility, onSave, onClose }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (pending) return;
     const changes = {};
     for (const field of ['name', 'city', 'address', 'description']) {
       const value = values[field].trim();
@@ -156,7 +188,8 @@ function FacilityDetailsForm({ facility, onSave, onClose }) {
     if (!Object.keys(changes).length) { setError('No hay cambios para guardar.'); return; }
     setPending(true);
     setError('');
-    await onSave(changes);
+    const failure = await onSave(changes);
+    if (failure && !isOwnerAccessLost(failure)) setError(errorCopy(failure));
     setPending(false);
   }
 
@@ -170,13 +203,15 @@ function PolicyForm({ facility, onSave, onClose }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (pending) return;
     const minimum = Number(values.minimumAdvanceMinutes);
     const maximum = Number(values.maximumAdvanceMinutes);
     if (!Number.isSafeInteger(minimum) || !Number.isSafeInteger(maximum)
       || minimum < 0 || maximum < minimum) { setError('La anticipación máxima debe ser igual o superior a la mínima.'); return; }
     setPending(true);
     setError('');
-    await onSave({ timeZone: values.timeZone.trim(), minimumAdvanceMinutes: minimum, maximumAdvanceMinutes: maximum });
+    const failure = await onSave({ timeZone: values.timeZone.trim(), minimumAdvanceMinutes: minimum, maximumAdvanceMinutes: maximum });
+    if (failure && !isOwnerAccessLost(failure)) setError(errorCopy(failure));
     setPending(false);
   }
 
@@ -190,6 +225,7 @@ function CreateCourtForm({ onSave, onClose }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (pending) return;
     const allowedDurationsMinutes = parseDurations(values.durations);
     const interval = Number(values.startIntervalMinutes);
     const separation = Number(values.minimumSeparationMinutes);
@@ -204,9 +240,10 @@ function CreateCourtForm({ onSave, onClose }) {
     }
     setPending(true);
     setError('');
-    await onSave({ name: values.name.trim(), description: values.description.trim() || null,
+    const failure = await onSave({ name: values.name.trim(), description: values.description.trim() || null,
       ...(sportCode ? { sportCode } : {}), minimumSeparationMinutes: separation,
       startIntervalMinutes: interval, allowedDurationsMinutes });
+    if (failure && !isOwnerAccessLost(failure)) setError(errorCopy(failure));
     setPending(false);
   }
 

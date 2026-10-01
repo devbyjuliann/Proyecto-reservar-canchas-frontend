@@ -76,6 +76,7 @@ export function ownerApplicationStatusLabel(status) {
 
 export function errorCopy(error) {
   const copies = {
+    invalid_request: 'Revisa los campos y su formato antes de intentarlo de nuevo.',
     invalid_credentials: 'El correo o la contraseña no coinciden.',
     authentication_required: 'Inicia sesión para continuar.',
     forbidden: 'Tu cuenta no tiene permiso para realizar esta acción.',
