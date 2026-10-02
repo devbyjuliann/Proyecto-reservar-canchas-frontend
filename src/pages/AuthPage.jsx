@@ -1,8 +1,9 @@
 import { Eye, EyeOff, LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../auth/AuthContext.jsx';
+import { AuthLayout } from '../components/AuthLayout.jsx';
 import { ButtonPending, ErrorNotice } from '../components/Feedback.jsx';
 import { errorCopy } from '../lib/format.js';
 
@@ -58,13 +59,7 @@ export function AuthPage() {
   }
 
   return (
-    <div className="auth-layout">
-      <section className="auth-intro">
-        <div className="court-corner" aria-hidden="true"><span /><span /><span /></div>
-        <h1>Tu cancha,<br />en el horario exacto.</h1>
-        <p>La disponibilidad se comprueba de nuevo al confirmar. Lo que reservas es un turno real, no una promesa.</p>
-      </section>
-      <section className="auth-form-wrap" aria-labelledby="auth-title">
+    <AuthLayout>
         <div className="auth-switch" role="tablist" aria-label="Acceso">
           <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => { setMode('login'); setError(null); }}>Ingresar</button>
           <button type="button" role="tab" aria-selected={mode === 'register'} onClick={() => { setMode('register'); setError(null); }}>Crear cuenta</button>
@@ -80,9 +75,9 @@ export function AuthPage() {
           ) : null}
           <label className="field"><span>Correo</span><div className="input-with-icon"><Mail size={18} aria-hidden="true" /><input type="email" name="email" value={values.email} onChange={update} autoComplete="email" required maxLength="254" aria-describedby={error ? 'auth-error' : undefined} /></div></label>
           <div className="field"><label htmlFor="auth-password">Contraseña</label><div className="input-with-icon"><LockKeyhole size={18} aria-hidden="true" /><input id="auth-password" type={showPassword ? 'text' : 'password'} name="password" value={values.password} onChange={update} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={mode === 'register' ? 12 : undefined} aria-describedby={[mode === 'register' ? 'auth-password-help' : null, error ? 'auth-error' : null].filter(Boolean).join(' ') || undefined} /><button className="password-toggle" type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>{showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}</button></div>{mode === 'register' ? <small id="auth-password-help">Mínimo 12 caracteres. No se modifican espacios ni mayúsculas.</small> : null}</div>
+          {mode === 'login' ? <Link className="auth-recovery-link" to="/recuperar-password">¿Olvidaste tu contraseña?</Link> : null}
           <button className="button button-primary button-wide" type="submit" disabled={pending}><ButtonPending pending={pending} pendingLabel={mode === 'login' ? 'Iniciando sesión…' : 'Creando cuenta…'}>{mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</ButtonPending></button>
         </form>
-      </section>
-    </div>
+    </AuthLayout>
   );
 }

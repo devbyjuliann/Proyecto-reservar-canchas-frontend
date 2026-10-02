@@ -11,6 +11,7 @@ import { AdminOwnerApplicationsPage } from './pages/admin/AdminOwnerApplications
 import { AdminOwnersPage } from './pages/admin/AdminOwnersPage.jsx';
 import { AdminOwnerPage } from './pages/admin/AdminOwnerPage.jsx';
 import { AuthPage } from './pages/AuthPage.jsx';
+import { PasswordResetConfirmPage, PasswordResetRequestPage } from './pages/PasswordResetPage.jsx';
 import { CourtDetailPage } from './pages/CourtDetailPage.jsx';
 import { FacilityDetailPage } from './pages/FacilityDetailPage.jsx';
 import { MarketplacePage } from './pages/MarketplacePage.jsx';
@@ -29,6 +30,8 @@ export function App() {
         <Route path="/" element={<MarketplacePage />} />
         <Route path="/acceso" element={<AuthPage />} />
         <Route path="/registro" element={<AuthPage />} />
+        <Route path="/recuperar-password" element={<PasswordResetRequestPage />} />
+        <Route path="/reset-password" element={<PasswordResetConfirmPage />} />
         <Route path="/instalaciones/:facilityId" element={<FacilityDetailPage />} />
         <Route path="/canchas/:courtId" element={<CourtDetailPage />} />
         <Route path="/propietarios" element={<RequireAuth><OwnerIntroPage /></RequireAuth>} />

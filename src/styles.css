@@ -151,6 +151,8 @@ a { color: inherit; }
 .auth-form-wrap #auth-password { padding-right: 3rem; }
 .auth-booking-context { margin: 0 0 var(--space-lg); padding: var(--space-md); color: #164c6e; background: #e0edf5; border-radius: var(--radius-control); font-size: .9rem; line-height: 1.5; }
 .form-lead { margin: .55rem 0 var(--space-lg); color: var(--muted); line-height: 1.5; }
+.auth-recovery-link { display: inline-block; justify-self: start; margin: .2rem 0; color: var(--court-deep); font-size: .86rem; font-weight: 680; text-underline-offset: 3px; }
+.auth-form-wrap > .auth-recovery-link { margin-top: 1.25rem; }
 
 .booking-layout { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) 328px; background: var(--paper); }
 .booking-stage { min-width: 0; padding: 3rem clamp(1.4rem, 4vw, 4rem) 4rem; }

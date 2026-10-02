@@ -38,6 +38,10 @@ export function AuthProvider({ children }) {
     return user;
   }
 
+  function clearLocalSession() {
+    setState({ status: 'anonymous', user: null });
+  }
+
   const value = {
     ...state,
     isAdministrator: state.user?.roles.includes('ADMINISTRADOR') ?? false,
@@ -46,6 +50,7 @@ export function AuthProvider({ children }) {
     register,
     logout,
     refreshSession,
+    clearLocalSession,
   };
 
   return <AuthContext value={value}>{children}</AuthContext>;
