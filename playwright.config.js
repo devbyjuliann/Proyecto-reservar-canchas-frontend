@@ -24,6 +24,7 @@ export default defineConfig({
       env: {
         PORT: '3000', FRONTEND_ORIGIN: 'http://localhost:5177',
         AUTH_TEST_REGISTRATION_LIMIT: '100', AUTH_TEST_LOGIN_LIMIT: '100',
+        GOOGLE_CLIENT_ID: 'google-e2e-web-client', AUTH_TEST_GOOGLE_SECRET: 'google-e2e-signature-only',
       },
       url: 'http://127.0.0.1:3000/health',
       reuseExistingServer: false,
@@ -31,6 +32,7 @@ export default defineConfig({
     },
     {
       command: 'npm run dev -- --host localhost --port 5177 --strictPort',
+      env: { VITE_GOOGLE_CLIENT_ID: 'google-e2e-web-client', VITE_GOOGLE_TEST_MODE: '1' },
       url: 'http://localhost:5177',
       reuseExistingServer: false,
       timeout: 30_000,

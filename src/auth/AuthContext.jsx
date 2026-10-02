@@ -27,6 +27,16 @@ export function AuthProvider({ children }) {
     return api('/api/v1/auth/registrations', { method: 'POST', body: input });
   }
 
+  async function loginWithGoogle(credential) {
+    const { user } = await api('/api/v1/auth/google', { method: 'POST', body: { credential } });
+    setState({ status: 'authenticated', user });
+    return user;
+  }
+
+  async function linkGoogle(credential) {
+    return api('/api/v1/auth/google/link', { method: 'POST', body: { credential } });
+  }
+
   async function logout() {
     await api('/api/v1/auth/session', { method: 'DELETE' });
     setState({ status: 'anonymous', user: null });
@@ -48,6 +58,8 @@ export function AuthProvider({ children }) {
     isOwner: state.user?.roles.includes('PROPIETARIO') ?? false,
     login,
     register,
+    loginWithGoogle,
+    linkGoogle,
     logout,
     refreshSession,
     clearLocalSession,

@@ -1,4 +1,6 @@
-import { randomUUID } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 import { expect, test } from '@playwright/test';
 
@@ -17,6 +19,16 @@ import { todayInTimeZone } from '../../src/lib/format.js';
 
 const BACKEND = 'http://localhost:3000';
 const PRICE_MINOR = 9000000;
+const OUTBOX = fileURLToPath(new URL('../../../backend/.password-reset-outbox.jsonl', import.meta.url));
+
+async function bookingEmails(email, type) {
+  const content = await readFile(OUTBOX, 'utf8').catch((error) => {
+    if (error.code === 'ENOENT') return '';
+    throw error;
+  });
+  return content.split('\n').filter(Boolean).map((line) => JSON.parse(line))
+    .filter((message) => message.email === email && message.type === type);
+}
 
 test('marketplace real: explorar → reservar con precio → cancelar', async ({ page, request }) => {
   test.setTimeout(90_000);
@@ -117,6 +129,29 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
     expect(booking.priceMinor).toBe(option.priceMinor);
     expect(booking.currency).toBe('COP');
     await expect(page.getByRole('heading', { name: 'Reserva confirmada' })).toBeVisible();
+    await expect.poll(async () => (await bookingEmails(email, 'booking-confirmation')).length).toBe(1);
+    const [confirmationMail] = await bookingEmails(email, 'booking-confirmation');
+    expect(confirmationMail.subject).toBe('Reserva confirmada - Reserva Canchas');
+    expect(confirmationMail.text).toContain(facility.name);
+    expect(confirmationMail.text).toContain(court.name);
+    const localDate = new Intl.DateTimeFormat('es-CO', {
+      day: 'numeric', month: 'long', year: 'numeric', timeZone: booking.timeZone,
+    }).format(new Date(booking.startAt));
+    expect(confirmationMail.text).toContain(localDate);
+    expect(confirmationMail.text).toContain(option.startTime.slice(0, 5));
+    expect(confirmationMail.text).toContain(`${option.durationMinutes} minutos`);
+    const snapshotPrice = `$${new Intl.NumberFormat('es-CO').format(booking.priceMinor / 100)} COP`;
+    expect(confirmationMail.text).toContain(snapshotPrice);
+    expect(confirmationMail.text).toContain('Estado: Confirmada');
+    expect(confirmationMail.text).toContain('/reservas');
+    expect(confirmationMail.html).toContain(facility.name);
+    const idempotent = await page.context().request.post(`${BACKEND}/api/v1/bookings`, {
+      headers: { 'Idempotency-Key': confirmation.request().headers()['idempotency-key'] },
+      data: confirmation.request().postDataJSON(),
+    });
+    expect(idempotent.status()).toBe(200);
+    expect((await idempotent.json()).booking.id).toBe(booking.id);
+    expect(await bookingEmails(email, 'booking-confirmation')).toHaveLength(1);
 
     await page.getByRole('link', { name: 'Mis reservas', exact: true }).click();
     const row = page.locator('.booking-row').filter({ hasText: booking.court.name });
@@ -132,6 +167,17 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
       && response.request().method() === 'POST');
     await row.getByRole('button', { name: 'Sí, cancelar' }).click();
     expect((await (await cancellationResponse).json()).booking.status).toBe('CANCELADA');
+    await expect.poll(async () => (await bookingEmails(email, 'booking-cancellation')).length).toBe(1);
+    const [cancellationMail] = await bookingEmails(email, 'booking-cancellation');
+    expect(cancellationMail.subject).toBe('Reserva cancelada - Reserva Canchas');
+    expect(cancellationMail.text).toContain(facility.name);
+    expect(cancellationMail.text).toContain(court.name);
+    expect(cancellationMail.text).toContain(localDate);
+    expect(cancellationMail.text).toContain(snapshotPrice);
+    expect(cancellationMail.text).toContain('Estado: Cancelada');
+    const cancelledAgain = await page.context().request.post(`${BACKEND}/api/v1/bookings/${booking.id}/cancellation`);
+    expect(cancelledAgain.status()).toBe(200);
+    expect(await bookingEmails(email, 'booking-cancellation')).toHaveLength(1);
     await expect(row).toContainText('Cancelada');
     await expect(page.getByText('No tienes reservas próximas.', { exact: false })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Anteriores y canceladas' })).toBeVisible();
@@ -140,6 +186,80 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
     const [cancelled] = await pool.execute('SELECT status, price_amount_minor, price_currency FROM bookings WHERE id = ?',
       [booking.id]);
     assertBooking(cancelled[0], 'CANCELADA', option.priceMinor);
+  } finally {
+    try { if (buyerId) await removeBuyer(pool, buyerId); }
+    finally {
+      try { if (createdFixture) await removeFixture(pool, createdFixture); }
+      finally { await pool.end(); }
+    }
+  }
+});
+
+test('Continuar con Google conserva el turno elegido hasta confirmar la Reserva', async ({ page, request }) => {
+  test.setTimeout(90_000);
+  const database = loadDatabaseConfig();
+  if (database.environment !== 'test' || !database.database.endsWith('_test')) throw new Error('Requires MySQL _test');
+  const pool = createMySqlPool(database);
+  let createdFixture;
+  let buyerId;
+  try {
+    let listing = await findAvailablePublicCourt(request);
+    if (!listing) {
+      createdFixture = await prepareMinimumListing(pool);
+      listing = await findAvailablePublicCourt(request, createdFixture.facilityId);
+    }
+    expect(listing).not.toBeNull();
+    const { court, date, option } = listing;
+    const email = `google-booking-${randomUUID()}@example.test`;
+    const payload = Buffer.from(JSON.stringify({
+      sub: randomUUID(), email, email_verified: true, name: 'Cliente Google',
+      aud: 'google-e2e-web-client', iss: 'accounts.google.com',
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    })).toString('base64url');
+    const credential = `${payload}.${createHmac('sha256', 'google-e2e-signature-only').update(payload).digest('base64url')}`;
+    await page.addInitScript(({ token }) => {
+      let onGoogleCredential;
+      window.google = { accounts: { id: {
+        initialize({ callback }) { onGoogleCredential = callback; },
+        renderButton(element) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = 'Continuar con Google';
+          button.onclick = () => onGoogleCredential({ credential: token });
+          element.append(button);
+        },
+      } } };
+    }, { token: credential });
+
+    await page.goto(`/canchas/${court.id}`);
+    await page.getByLabel('Fecha para jugar').fill(date);
+    await page.getByRole('button', { name: 'Ver turnos' }).click();
+    await page.locator('.slot-option').filter({ hasText: option.startTime.slice(0, 5) })
+      .filter({ hasText: `${option.durationMinutes} min` }).first().click();
+    await page.getByRole('button', { name: 'Iniciar sesión para confirmar' }).click();
+    await expect(page).toHaveURL(/\/acceso$/);
+    await expect(page.getByText('Inicia sesión para continuar con tu reserva.', { exact: false })).toBeVisible();
+    const loginResponse = page.waitForResponse((response) => response.url().endsWith('/api/v1/auth/google'));
+    await page.getByRole('button', { name: 'Continuar con Google' }).click();
+    const login = await loginResponse;
+    expect(login.status()).toBe(200);
+    buyerId = (await login.json()).user.id;
+    expect((await login.json()).user.roles).toEqual(['USUARIO']);
+    await expect(page).toHaveURL(new RegExp(`/canchas/${court.id}$`));
+    await expect(page.getByRole('button', { name: 'Confirmar reserva' })).toBeVisible();
+    await expect(page.locator('.ticket-body')).toContainText(option.startTime.slice(0, 5));
+    const confirmed = page.waitForResponse((response) => response.url().endsWith('/api/v1/bookings')
+      && response.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Confirmar reserva' }).click();
+    const result = await confirmed;
+    expect(result.status()).toBe(201);
+    const { booking } = await result.json();
+    expect(booking).toMatchObject({ court: { id: court.id }, priceMinor: option.priceMinor, status: 'CONFIRMADA' });
+    await expect(page.getByRole('heading', { name: 'Reserva confirmada' })).toBeVisible();
+    const [identities] = await pool.execute('SELECT provider FROM user_external_identities WHERE user_id = ?', [buyerId]);
+    const [passwords] = await pool.execute('SELECT user_id FROM user_credentials WHERE user_id = ?', [buyerId]);
+    expect(identities.map((identity) => identity.provider)).toEqual(['GOOGLE']);
+    expect(passwords).toHaveLength(0);
   } finally {
     try { if (buyerId) await removeBuyer(pool, buyerId); }
     finally {
@@ -241,6 +361,7 @@ async function prepareMinimumListing(pool) {
 }
 
 async function removeBuyer(pool, userId) {
+  await pool.execute('DELETE FROM user_external_identities WHERE user_id = ?', [userId]);
   await pool.execute('DELETE FROM idempotency_records WHERE user_id = ?', [userId]);
   await pool.execute('DELETE FROM operational_conflicts WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [userId]);
   await pool.execute('DELETE FROM bookings WHERE user_id = ?', [userId]);

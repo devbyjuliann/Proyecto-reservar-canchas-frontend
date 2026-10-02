@@ -78,6 +78,11 @@ export function errorCopy(error) {
   const copies = {
     invalid_request: 'Revisa los campos y su formato antes de intentarlo de nuevo.',
     invalid_credentials: 'El correo o la contraseña no coinciden.',
+    invalid_google_credential: 'No pudimos verificar el acceso con Google. Inténtalo nuevamente.',
+    google_link_requires_confirmation: 'Ya existe una cuenta con este correo. Inicia sesión con tu contraseña y vincula Google desde Mi perfil.',
+    google_identity_conflict: 'Esta identidad de Google no puede vincularse a esta cuenta.',
+    google_link_requires_recent_login: 'Por seguridad, cierra sesión y vuelve a iniciar sesión antes de vincular Google.',
+    google_not_configured: 'Google no está disponible ahora. Puedes iniciar sesión con tu contraseña.',
     invalid_password_reset_token: 'Este enlace ya no es válido o ha expirado.',
     authentication_required: 'Inicia sesión para continuar.',
     forbidden: 'Tu cuenta no tiene permiso para realizar esta acción.',

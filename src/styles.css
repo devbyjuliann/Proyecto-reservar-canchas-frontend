@@ -152,6 +152,15 @@ a { color: inherit; }
 .auth-booking-context { margin: 0 0 var(--space-lg); padding: var(--space-md); color: #164c6e; background: #e0edf5; border-radius: var(--radius-control); font-size: .9rem; line-height: 1.5; }
 .form-lead { margin: .55rem 0 var(--space-lg); color: var(--muted); line-height: 1.5; }
 .auth-recovery-link { display: inline-block; justify-self: start; margin: .2rem 0; color: var(--court-deep); font-size: .86rem; font-weight: 680; text-underline-offset: 3px; }
+.google-identity { min-height: 44px; margin: 0 0 var(--space-sm); }
+.google-identity > div { width: 100%; min-height: 40px; }
+.google-identity.is-pending { pointer-events: none; opacity: .65; }
+.google-identity p { margin: 0 0 .5rem; color: var(--muted); font-size: .85rem; }
+.auth-divider { display: flex; align-items: center; gap: .75rem; margin: .4rem 0 1rem; color: var(--muted); font-size: .85rem; }
+.auth-divider::before, .auth-divider::after { content: ''; height: 1px; flex: 1; background: var(--rule); }
+.profile-google { margin-top: var(--space-xl); padding: var(--space-lg); border: 1px solid var(--rule); border-radius: var(--radius); background: var(--white); }
+.profile-google h2 { margin: 0; font-size: 1.25rem; }
+.profile-google > p { max-width: 60ch; margin: .5rem 0 var(--space-md); color: var(--muted); line-height: 1.5; }
 .auth-form-wrap > .auth-recovery-link { margin-top: 1.25rem; }
 
 .booking-layout { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) 328px; background: var(--paper); }

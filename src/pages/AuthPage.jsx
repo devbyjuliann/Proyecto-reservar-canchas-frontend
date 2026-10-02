@@ -5,6 +5,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { AuthLayout } from '../components/AuthLayout.jsx';
 import { ButtonPending, ErrorNotice } from '../components/Feedback.jsx';
+import { GoogleIdentityButton } from '../components/GoogleIdentityButton.jsx';
 import { errorCopy } from '../lib/format.js';
 
 export function AuthPage() {
@@ -58,6 +59,19 @@ export function AuthPage() {
     }
   }
 
+  async function googleLogin(credential) {
+    if (pending) return;
+    setPending(true);
+    setError(null);
+    try {
+      await auth.loginWithGoogle(credential);
+      navigate(location.state?.from ?? '/', {
+        replace: true, state: location.state?.intent ? { intent: location.state.intent } : undefined,
+      });
+    } catch (caught) { setError(caught); }
+    finally { setPending(false); }
+  }
+
   return (
     <AuthLayout>
         <div className="auth-switch" role="tablist" aria-label="Acceso">
@@ -69,6 +83,8 @@ export function AuthPage() {
         {resumingBooking ? <p className="auth-booking-context" role="status">{mode === 'login' ? 'Inicia sesión para continuar con tu reserva. Al volver, comprobaremos que el turno siga disponible.' : 'Crea tu cuenta y luego inicia sesión para retomar tu reserva.'}</p> : null}
         {message ? <div className="notice notice-success" role="status">{message}</div> : null}
         {error ? <div id="auth-error"><ErrorNotice>{errorCopy(error)}</ErrorNotice></div> : null}
+        <GoogleIdentityButton onCredential={googleLogin} disabled={pending} />
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID ? <div className="auth-divider" aria-hidden="true">o</div> : null}
         <form className="form-stack" onSubmit={submit}>
           {mode === 'register' ? (
             <label className="field"><span>Nombre</span><div className="input-with-icon"><UserRound size={18} aria-hidden="true" /><input name="name" value={values.name} onChange={update} autoComplete="name" required maxLength="150" aria-describedby={error ? 'auth-error' : undefined} /></div></label>
