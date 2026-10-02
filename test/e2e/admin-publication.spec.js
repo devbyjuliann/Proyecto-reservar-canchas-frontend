@@ -21,8 +21,13 @@ test('administrador publica y despublica una instalación preparada', async ({ p
     await page.goto('/acceso');
     await page.getByLabel('Correo').fill(fixture.email);
     await page.getByLabel('Contraseña', { exact: true }).fill(fixture.password);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await expect(page.getByRole('link', { name: 'Administración' })).toBeVisible();
+    await page.goto(`/admin/instalaciones/${fixture.facilityId}`);
+    await expectAdminResponsiveLayout(page);
+    await page.goto(`/admin/canchas/${ids.court}`);
+    await expect(page.getByRole('heading', { name: 'Cancha Test' })).toBeVisible();
+    await expectAdminResponsiveLayout(page);
     await page.goto(`/admin/instalaciones/${fixture.facilityId}`);
     await expect(page.getByText('BORRADOR', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Publicar instalación' })).toBeVisible();
@@ -64,4 +69,13 @@ async function prepare(pool, ids) {
   const pricing = createCourtPricingModule({ adapter: createMySqlCourtPricingAdapter({ pool }), memberships: membership }); await pricing.setPrice({ actor: { ...admin, roles: ['USUARIO', 'ADMINISTRADOR'] }, scope: 'admin', courtId: ids.court, durationMinutes: 60, priceMinor: 5000000 });
   return { email, password, facilityId: ids.facility };
 }
+
+async function expectAdminResponsiveLayout(page) {
+  for (const width of [1280, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
+}
+
 async function cleanup(pool, ids) { if (ids.court) { await pool.execute('DELETE FROM operational_conflicts WHERE operational_change_id IN (SELECT id FROM operational_changes WHERE court_id = ?)', [ids.court]); await pool.execute('DELETE FROM operational_changes WHERE court_id = ?', [ids.court]); await pool.execute('DELETE FROM court_prices WHERE court_id = ?', [ids.court]); await pool.execute('DELETE FROM court_allowed_durations WHERE court_id = ?', [ids.court]); await pool.execute('DELETE FROM courts WHERE id = ?', [ids.court]); } if (ids.facility) { await pool.execute('DELETE FROM facility_memberships WHERE facility_id = ?', [ids.facility]); await pool.execute('DELETE FROM facilities WHERE id = ?', [ids.facility]); } for (const id of [ids.owner, ids.admin]) if (id) { await pool.execute('DELETE FROM owner_applications WHERE user_id = ?', [id]); await pool.execute('DELETE FROM sessions WHERE user_id = ?', [id]); await pool.execute('DELETE FROM user_credentials WHERE user_id = ?', [id]); await pool.execute('DELETE FROM user_roles WHERE user_id = ?', [id]); await pool.execute('DELETE FROM users WHERE id = ?', [id]); } }

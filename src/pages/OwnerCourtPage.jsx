@@ -5,6 +5,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { api, withQuery } from '../api/client.js';
 import { LoadingBlock } from '../components/Feedback.jsx';
 import { isOwnerAccessLost, OwnerAccessNotice } from '../components/OwnerAccessNotice.jsx';
+import { StatusBadge } from '../components/Primitives.jsx';
 import {
   ConfigurationSection, ExceptionsSection, GeneralSection,
   PricesSection, ScheduleSection, UnavailabilitySection,
@@ -151,7 +152,7 @@ export function OwnerCourtPage() {
     {loading ? <LoadingBlock lines={5} label="Cargando Cancha" /> : null}
     {accessError || error ? <OwnerAccessNotice error={accessError || error} onRetry={() => setRefresh((value) => value + 1)} /> : null}
     {court && facility && !accessLost.current ? <>
-      <header className="owner-console-hero"><div><span className="owner-console-label">{facility.name}</span><h1>{court.name}</h1><p>{court.description || 'Completa la descripción de esta Cancha desde General.'}</p><span className="owner-court-location"><MapPin size={16} aria-hidden="true" />{facility.city || 'Ciudad por definir'} · {facility.timeZone}</span></div><span className={`owner-state ${court.state === 'active' ? 'state-aprobada' : 'state-rechazada'}`}>{court.state === 'active' ? 'Activa' : 'Inactiva'}</span></header>
+      <header className="owner-console-hero"><div><span className="owner-console-label">{facility.name}</span><h1>{court.name}</h1><p>{court.description || 'Completa la descripción de esta Cancha desde General.'}</p><div className="owner-hero-facts"><span><MapPin size={15} aria-hidden="true" />{facility.city || 'Ciudad por definir'} · {facility.timeZone}</span><StatusBadge tone={court.state === 'active' ? 'positive' : 'negative'}>{court.state === 'active' ? 'Activa' : 'Inactiva'}</StatusBadge></div></div></header>
        <nav className="owner-section-nav" aria-label="Secciones de la Cancha"><div className="owner-nav-group" role="group" aria-label="Información"><button type="button" aria-pressed={section === 'general'} onClick={() => selectSection('general')}>Información</button></div><div className="owner-nav-group" role="group" aria-label="Disponibilidad"><span>Disponibilidad</span>{sections.filter((item) => ['configuration', 'schedule', 'exceptions', 'unavailabilities'].includes(item.key)).map((item) => <button key={item.key} type="button" aria-pressed={section === item.key} onClick={() => selectSection(item.key)}>{item.label}</button>)}</div><div className="owner-nav-group" role="group" aria-label="Tarifas"><span>Tarifas</span><button type="button" aria-pressed={section === 'prices'} onClick={() => selectSection('prices')}>Tarifas</button></div></nav>
       <div className="owner-console-body owner-court-content">
         {message ? <p className="notice notice-success" role="status">{message}</p> : null}

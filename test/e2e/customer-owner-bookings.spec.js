@@ -37,7 +37,7 @@ test('cliente reserva y propietario ve únicamente su turno recibido', async ({ 
     });
 
     await page.goto('/');
-    await page.getByRole('searchbox', { name: 'Busca una cancha o establecimiento' }).fill(setup.facility.name);
+    await page.getByRole('searchbox', { name: 'Buscar' }).fill(setup.facility.name);
     await page.getByRole('button', { name: 'Buscar', exact: true }).click();
     await page.getByRole('link', { name: `Ver establecimiento ${setup.facility.name}` }).click();
     await page.getByRole('link', { name: `Ver cancha ${setup.court.name} de ${setup.facility.name}` }).click();
@@ -51,7 +51,8 @@ test('cliente reserva y propietario ve únicamente su turno recibido', async ({ 
     expect(option).toBeDefined();
     await page.locator('.slot-option').filter({ hasText: '08:00' }).filter({ hasText: '60 min' }).click();
     await expect(page.locator('.ticket-body')).toContainText(formatCOP(PRICE_MINOR));
-    await page.getByRole('button', { name: 'Ingresar para reservar' }).click();
+    await expect(page.getByLabel('Resumen de la reserva')).toContainText('08:00 – 09:00');
+    await page.getByRole('button', { name: 'Iniciar sesión para confirmar' }).click();
     await page.getByRole('tab', { name: 'Crear cuenta' }).click();
     await page.getByLabel('Nombre').fill('Cliente E2E');
     await page.getByLabel('Correo').fill(setup.buyer.email);
@@ -62,7 +63,7 @@ test('cliente reserva y propietario ve únicamente su turno recibido', async ({ 
     expect(registration.status()).toBe(201);
     fixture.buyerId = (await registration.json()).user.id;
     await page.getByLabel('Contraseña', { exact: true }).fill(setup.buyer.password);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Confirmar reserva' })).toBeVisible();
     expect((await page.context().cookies(BACKEND)).some((cookie) => cookie.httpOnly)).toBe(true);
     const confirmationResponse = page.waitForResponse((response) => response.url().endsWith('/api/v1/bookings') && response.request().method() === 'POST');
@@ -84,7 +85,7 @@ test('cliente reserva y propietario ve únicamente su turno recibido', async ({ 
     await page.goto('/acceso');
     await page.getByLabel('Correo').fill(setup.owner.email);
     await page.getByLabel('Contraseña', { exact: true }).fill(setup.owner.password);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await page.getByRole('link', { name: 'Mi negocio', exact: true }).click();
     await page.getByRole('link', { name: 'Reservas', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Reservas recibidas' })).toBeVisible();
@@ -119,10 +120,10 @@ test('cliente reserva y propietario ve únicamente su turno recibido', async ({ 
     await page.goto('/acceso');
     await page.getByLabel('Correo').fill(setup.buyer.email);
     await page.getByLabel('Contraseña', { exact: true }).fill(setup.buyer.password);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await page.getByRole('link', { name: 'Mis reservas', exact: true }).click();
     const cleanupRow = page.locator('.booking-row').filter({ hasText: setup.court.name });
-    await cleanupRow.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await cleanupRow.getByRole('button', { name: 'Cancelar reserva', exact: true }).click();
     await cleanupRow.getByRole('button', { name: 'Sí, cancelar' }).click();
     await expect(cleanupRow).toContainText('Cancelada');
     const [cancelled] = await pool.execute('SELECT status FROM bookings WHERE id = ?', [booking.id]);

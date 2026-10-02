@@ -7,6 +7,7 @@ test('registro → login → /me → logout con sesión real', async ({ page }) 
   const password = 'Contrasena-E2E-2026!';
 
   await page.goto('/acceso');
+  await expect(page.getByRole('heading', { name: 'Iniciar sesión' })).toBeVisible();
   await page.getByRole('tab', { name: 'Crear cuenta' }).click();
   await page.getByLabel('Nombre').fill(name);
   await page.getByLabel('Correo').fill(email);
@@ -15,8 +16,11 @@ test('registro → login → /me → logout con sesión real', async ({ page }) 
   await expect(page.getByText('Cuenta creada. Ingresa con tu correo y contraseña.')).toBeVisible();
 
   await page.getByLabel('Contraseña', { exact: true }).fill(password);
-  await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+  await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
   await expect(page.getByText(name)).toBeVisible();
+  await page.goto('/reservas');
+  await expect(page.getByRole('heading', { name: 'Todavía no tienes reservas' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Buscar una cancha' })).toBeVisible();
 
   const cookies = await page.context().cookies('http://localhost:3000');
   expect(cookies.some((cookie) => cookie.httpOnly)).toBe(true);

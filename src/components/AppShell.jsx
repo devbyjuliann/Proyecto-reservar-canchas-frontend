@@ -94,8 +94,8 @@ function AdminShell({ children }) {
       <aside className={`app-rail ${open ? 'is-open' : ''}`}>
         <Brand />
         <nav aria-label="Navegación principal" onClick={() => setOpen(false)}>
-          <NavGroup links={userLinks} />
-          {auth.isAdministrator ? <NavGroup label="Operación" links={adminLinks} /> : null}
+          {auth.isAdministrator ? <NavGroup label="Administración" links={adminLinks} /> : null}
+          <NavGroup label="Cuenta" links={userLinks} />
         </nav>
         <div className="rail-account">
           {auth.status === 'authenticated' ? (

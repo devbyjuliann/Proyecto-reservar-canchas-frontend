@@ -3,7 +3,7 @@ import { startTransition, useEffect, useState } from 'react';
 
 import { api, withQuery } from '../../api/client.js';
 import { EmptyState, ErrorNotice, LoadingBlock } from '../../components/Feedback.jsx';
-import { PageHeading } from '../../components/Primitives.jsx';
+import { PageHeading, StatusBadge } from '../../components/Primitives.jsx';
 import { errorCopy, formatInstant } from '../../lib/format.js';
 
 export function AdminConflictsPage() {
@@ -45,7 +45,7 @@ export function AdminConflictsPage() {
         <section className="conflict-list" aria-label="Listado de conflictos">
           {loading && !items.length ? <LoadingBlock lines={6} /> : null}
           {!loading && !items.length ? <EmptyState icon={AlertOctagon} title="No hay conflictos en esta vista">Los cambios operativos compatibles no generan filas aquí.</EmptyState> : null}
-          {items.map((conflict) => <button className={`conflict-row ${selected?.id === conflict.id ? 'selected' : ''}`} type="button" key={conflict.id} onClick={() => inspect(conflict.id)}><span className="conflict-id">#{conflict.id}</span><span><strong>Reserva {conflict.booking.id}</strong><small>Cancha {conflict.booking.courtId} · {formatInstant(conflict.detectedAt)}</small></span><span className={conflict.resolvedAt ? 'resolved' : 'open'}>{conflict.resolvedAt ? 'Resuelto' : 'Abierto'}</span></button>)}
+          {items.map((conflict) => <button className={`conflict-row ${selected?.id === conflict.id ? 'selected' : ''}`} type="button" key={conflict.id} onClick={() => inspect(conflict.id)}><span className="conflict-id">#{conflict.id}</span><span><strong>Reserva {conflict.booking.id}</strong><small>Cancha {conflict.booking.courtId} · {formatInstant(conflict.detectedAt)}</small></span><StatusBadge tone={conflict.resolvedAt ? 'neutral' : 'negative'}>{conflict.resolvedAt ? 'Resuelto' : 'Abierto'}</StatusBadge></button>)}
           {cursor ? <button className="button button-quiet load-more" type="button" onClick={() => load(cursor)}><ChevronDown size={17} />Ver más</button> : null}
         </section>
         <aside className="conflict-detail">
@@ -57,5 +57,5 @@ export function AdminConflictsPage() {
 }
 
 function ConflictDetail({ conflict }) {
-  return <><header><span>Conflicto #{conflict.id}</span><strong>{conflict.resolvedAt ? 'Resuelto' : 'Abierto'}</strong></header><h2>Reserva {conflict.booking.id}</h2><dl><div><dt>Cancha</dt><dd>{conflict.booking.courtId}</dd></div><div><dt>Usuario</dt><dd>{conflict.booking.userId}</dd></div><div><dt>Inicio</dt><dd>{formatInstant(conflict.booking.startAt, conflict.booking.timeZone)}</dd></div><div><dt>Fin</dt><dd>{formatInstant(conflict.booking.endAt, conflict.booking.timeZone)}</dd></div><div><dt>Cambio</dt><dd>{conflict.operationalChange.type}</dd></div><div><dt>Realizado por</dt><dd>Usuario {conflict.operationalChange.actorUserId}</dd></div></dl><p className="ticket-note">El MVP permite consultar este conflicto, pero no resolverlo ni modificar la Reserva.</p></>;
+  return <><header><span>Conflicto #{conflict.id}</span><StatusBadge tone={conflict.resolvedAt ? 'neutral' : 'negative'}>{conflict.resolvedAt ? 'Resuelto' : 'Abierto'}</StatusBadge></header><h2>Reserva {conflict.booking.id}</h2><dl><div><dt>Cancha</dt><dd>{conflict.booking.courtId}</dd></div><div><dt>Usuario</dt><dd>{conflict.booking.userId}</dd></div><div><dt>Inicio</dt><dd>{formatInstant(conflict.booking.startAt, conflict.booking.timeZone)}</dd></div><div><dt>Fin</dt><dd>{formatInstant(conflict.booking.endAt, conflict.booking.timeZone)}</dd></div><div><dt>Cambio</dt><dd>{conflict.operationalChange.type}</dd></div><div><dt>Realizado por</dt><dd>Usuario {conflict.operationalChange.actorUserId}</dd></div></dl><p className="ticket-note">El MVP permite consultar este conflicto, pero no resolverlo ni modificar la Reserva.</p></>;
 }

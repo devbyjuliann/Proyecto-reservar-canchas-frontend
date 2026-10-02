@@ -149,7 +149,7 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await expect(page.getByRole('link', { name: 'Mis reservas' })).toBeVisible();
     ids.buyer = (await (await page.context().request.get(`${API}/api/v1/me`)).json()).user.id;
     await page.goto('/');
-    await page.getByRole('searchbox', { name: 'Busca una cancha o establecimiento' }).fill(name);
+    await page.getByRole('searchbox', { name: 'Buscar' }).fill(name);
     await page.getByRole('button', { name: 'Buscar', exact: true }).click();
     await page.getByRole('link', { name: `Ver establecimiento ${name}` }).click();
     await page.getByRole('link', { name: `Ver cancha Cancha ${unique} de ${name}` }).click();
@@ -178,10 +178,12 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await login(page, admin);
     await expect(page.getByRole('link', { name: 'Administración' })).toBeVisible();
     await page.goto('/admin/propietarios');
+    await expectAdminResponsiveLayout(page);
     await page.getByLabel('Buscar por nombre o correo').fill(owner.email);
     await page.getByRole('button', { name: 'Buscar' }).click();
     await page.locator('.resource-row').filter({ hasText: owner.email }).click();
     await expect(page.getByRole('heading', { name: 'Propietario E2E' })).toBeVisible();
+    await expectAdminResponsiveLayout(page);
     await expect(page.getByText(name)).toBeVisible();
     await page.getByRole('button', { name: 'Suspender propietario', exact: true }).click();
     await expect(page.getByText(/Sus datos, instalaciones y reservas se conservarán/)).toBeVisible();
@@ -209,7 +211,7 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await expect(page.getByRole('heading', { name: 'Mis reservas' })).toBeVisible();
     const ownRow = page.locator('.booking-row').filter({ hasText: `Cancha ${unique}` });
     await expect(ownRow).toContainText('Confirmada');
-    await ownRow.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await ownRow.getByRole('button', { name: 'Cancelar reserva', exact: true }).click();
     await ownRow.getByRole('button', { name: 'Sí, cancelar' }).click();
     await expect(ownRow).toContainText('Cancelada');
     expect((await page.context().request.get(`${API}/api/v1/facilities/${ids.facility}`)).status()).toBe(200);
@@ -248,8 +250,16 @@ async function login(page, credentials) {
   await page.goto('/acceso');
   await page.getByLabel('Correo').fill(credentials.email);
   await page.getByLabel('Contraseña', { exact: true }).fill(credentials.password);
-  await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+  await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
+}
+
+async function expectAdminResponsiveLayout(page) {
+  for (const width of [1280, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
 }
 
 async function logout(page) {

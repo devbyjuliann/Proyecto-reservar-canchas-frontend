@@ -42,7 +42,7 @@ test('owner real: configuración, horario y precio hasta el marketplace público
     await page.goto('/acceso');
     await page.getByLabel('Correo').fill(credentials.email);
     await page.getByLabel('Contraseña', { exact: true }).fill(credentials.password);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await expect(page.getByRole('link', { name: 'Mi negocio', exact: true })).toBeVisible();
     expect((await page.context().cookies(BACKEND)).some((cookie) => cookie.httpOnly)).toBe(true);
     const foreign = await api.get(`${BACKEND}/api/v1/owner/courts/${foreignCourtId}`);
@@ -52,13 +52,16 @@ test('owner real: configuración, horario y precio hasta el marketplace público
     const facilityResponse = await api.get(`${BACKEND}/api/v1/owner/facilities?limit=25`);
     expect(facilityResponse.status()).toBe(200);
     expect((await facilityResponse.json()).items.map((item) => item.id)).toEqual([facilityId]);
+    await expectOwnerResponsiveLayout(page);
     const facilityName = (await (await api.get(`${BACKEND}/api/v1/owner/facilities/${facilityId}`)).json()).facility.name;
     await page.locator('.owner-dashboard-facility').filter({ hasText: facilityName }).getByRole('link', { name: 'Abrir negocio' }).click();
     await expect(page.getByRole('heading', { name: facilityName })).toBeVisible();
+    await expectOwnerResponsiveLayout(page);
     const courtName = (await (await api.get(`${BACKEND}/api/v1/owner/courts/${courtId}`)).json()).court.name;
     await page.locator('.owner-court-row').filter({ hasText: courtName }).click();
     await expect(page.getByRole('heading', { name: courtName })).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/owner/canchas/${courtId}$`));
+    await expectOwnerResponsiveLayout(page);
 
     const configurationPath = `${BACKEND}/api/v1/owner/courts/${courtId}/booking-configuration`;
     const schedulePath = `${BACKEND}/api/v1/owner/courts/${courtId}/weekly-schedule`;
@@ -124,7 +127,7 @@ test('owner real: configuración, horario y precio hasta el marketplace público
     expect(persistedPrice.priceMinor).toBe(UPDATED_PRICE);
 
     await page.getByRole('link', { name: 'Marketplace' }).click();
-    await page.getByRole('searchbox', { name: 'Busca una cancha o establecimiento' }).fill(facilityName);
+    await page.getByRole('searchbox', { name: 'Buscar' }).fill(facilityName);
     await page.getByRole('button', { name: 'Buscar', exact: true }).click();
     await page.getByRole('link', { name: `Ver establecimiento ${facilityName}` }).click();
     await page.getByRole('link', { name: `Ver cancha ${courtName} de ${facilityName}` }).click();
@@ -180,6 +183,14 @@ function futureWeekday() {
   const date = new Date(`${todayInTimeZone('America/Bogota')}T12:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() + 3);
   return date.getUTCDay() || 7;
+}
+
+async function expectOwnerResponsiveLayout(page) {
+  for (const width of [1280, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
 }
 
 async function prepareOwnerFixture(pool, fixture) {

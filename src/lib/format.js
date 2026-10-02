@@ -81,12 +81,12 @@ export function errorCopy(error) {
     authentication_required: 'Inicia sesión para continuar.',
     forbidden: 'Tu cuenta no tiene permiso para realizar esta acción.',
     resource_not_found: 'El recurso ya no está disponible o no existe.',
-    option_not_available: 'Ese turno dejó de estar disponible. Consulta la fecha de nuevo.',
-    booking_conflict: 'Otra persona confirmó un turno incompatible. Actualiza la disponibilidad.',
-    booking_price_changed: 'El precio cambió. Revisa el importe actualizado y elige el turno de nuevo.',
+    option_not_available: 'Este horario acaba de dejar de estar disponible. Elige otro turno.',
+    booking_conflict: 'Este horario acaba de dejar de estar disponible. Elige otro turno.',
+    booking_price_changed: 'El precio de este turno cambió desde que lo seleccionaste. Revisa la nueva selección.',
     invalid_booking_option: 'Ese turno ya no cumple la configuración vigente.',
     booking_already_started: 'La reserva ya comenzó y no se puede cancelar.',
-    invalid_booking_state: 'El estado actual de la reserva no permite cancelarla.',
+    invalid_booking_state: 'Esta reserva ya no se puede cancelar.',
     email_already_registered: 'Ese correo ya está registrado. Puedes iniciar sesión.',
     resource_inactive: 'El recurso está inactivo y no admite cambios.',
     facility_not_publishable: 'La Instalación aún no está lista para publicar. Revisa sus datos públicos, una membresía activa de Propietario y una Cancha con duración y precio COP.',
@@ -100,5 +100,5 @@ export function errorCopy(error) {
     membership_conflict: 'Ese Usuario no puede asignarse o ya tiene una membresía activa aquí.',
     rate_limit_exceeded: 'Hay demasiados intentos. Espera un momento antes de volver a intentar.',
   };
-  return copies[error?.code] ?? 'No se pudo completar la acción. Revisa los datos e inténtalo de nuevo.';
+  return copies[error?.code] ?? 'No pudimos completar la operación. Inténtalo nuevamente.';
 }

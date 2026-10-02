@@ -35,6 +35,6 @@ export function EmptyState({ icon: Icon, title, children, action }) {
   );
 }
 
-export function ButtonPending({ pending, children }) {
-  return pending ? <><LoaderCircle className="spin" size={17} aria-hidden="true" /> Guardando</> : children;
+export function ButtonPending({ pending, pendingLabel = 'Guardando…', children }) {
+  return pending ? <><LoaderCircle className="spin" size={17} aria-hidden="true" />{pendingLabel}</> : children;
 }

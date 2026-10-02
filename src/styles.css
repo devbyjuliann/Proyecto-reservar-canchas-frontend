@@ -12,7 +12,7 @@
   --zone: #2878b8;
   --line: #f7f5e9;
   --ball: #d5e743;
-  --referee: #d94b4b;
+  --referee: #a83232;
   --paper: #f7f5e9;
   --white: #fffef8;
   --muted: #66736f;
@@ -20,8 +20,17 @@
   --rule: #c8d0c9;
   --success: #16785f;
   --focus: #2878b8;
+  --control-border: #b8c3bc;
+  --radius-control: 8px;
   --radius: 12px;
-  --shadow: 0 18px 42px rgba(21, 37, 33, 0.13), 0 3px 10px rgba(21, 37, 33, 0.08);
+  --radius-pill: 999px;
+  --space-xs: .5rem;
+  --space-sm: .75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --shadow: 0 14px 34px rgba(21, 37, 33, .12), 0 3px 10px rgba(21, 37, 33, .06);
 }
 
 * { box-sizing: border-box; }
@@ -30,7 +39,7 @@ body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--paper);
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
-button:disabled { cursor: not-allowed; opacity: .55; }
+button:disabled { cursor: not-allowed; opacity: .68; }
 a { color: inherit; }
 ::selection { color: var(--rubber); background: var(--ball); }
 *:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
@@ -69,35 +78,38 @@ a { color: inherit; }
 .page-heading p, .resource-hero p { max-width: 62ch; margin: .7rem 0 0; color: var(--muted); line-height: 1.55; }
 .page-actions { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
 
-.button { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 44px; padding: .68rem 1rem; border: 0; border-radius: 9px; font-weight: 680; line-height: 1; text-decoration: none; transition: transform 160ms ease-out, background 160ms ease-out, color 160ms ease-out; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); min-height: 44px; padding: .7rem var(--space-md); border: 1px solid transparent; border-radius: var(--radius-control); font-weight: 680; font-size: .9rem; line-height: 1.2; text-align: center; text-decoration: none; transition: transform 160ms ease-out, background 160ms ease-out, color 160ms ease-out; }
 .button:not(:disabled):active { transform: translateY(1px); }
 .button-primary { color: var(--rubber); background: var(--ball); }
-.button-primary:hover { background: #e2ef66; }
+.button-primary:hover:not(:disabled) { background: #e2ef66; }
 .button-secondary { color: var(--white); background: var(--court); }
-.button-secondary:hover { background: var(--court-deep); }
+.button-secondary:hover:not(:disabled) { background: var(--court-deep); }
 .button-dark { color: var(--white); background: var(--rubber); }
 .button-dark:hover { background: #253a35; }
-.button-quiet { color: var(--rubber); background: var(--wash); }
-.button-quiet:hover { background: #dce3db; }
+.button-quiet { color: var(--court-deep); background: transparent; border-color: var(--rule); }
+.button-quiet:hover:not(:disabled) { background: var(--wash); }
 .button-danger { color: var(--white); background: var(--referee); }
+.button-danger:hover:not(:disabled) { background: #8c2929; }
 .button-danger-subtle { color: #982d2d; background: #f8dddd; }
-.button-small { min-height: 36px; padding: .52rem .75rem; font-size: .82rem; }
+.button-small { min-height: 40px; padding: .52rem var(--space-sm); font-size: .85rem; }
 .button-wide { width: 100%; }
 .button-search { align-self: end; color: var(--rubber); background: var(--ball); }
+.button-search:hover:not(:disabled) { background: #e2ef66; }
 .icon-button { display: inline-grid; width: 40px; height: 40px; place-items: center; flex: 0 0 auto; color: inherit; background: transparent; border: 0; border-radius: 8px; }
 .icon-button:hover { background: rgba(21, 37, 33, .08); }
 
-.field { display: grid; gap: .42rem; align-content: start; }
-.field > span, .field > label, .court-search label > span, .conflict-filters label > span, .period-row label > span { color: #44534f; font-size: .78rem; font-weight: 680; }
-.field input, .field select, .field textarea, .court-search input, .conflict-filters input, .period-row input, .period-row select { width: 100%; min-height: 46px; padding: .7rem .82rem; color: var(--rubber); background: var(--white); border: 1px solid #b8c3bc; border-radius: 8px; }
+.field, .market-field { display: grid; gap: var(--space-xs); align-content: start; }
+.field > span, .field > label, .market-field > span, .court-search label > span, .conflict-filters label > span, .period-row label > span { color: #44534f; font-size: .85rem; font-weight: 680; }
+.field input, .field select, .field textarea, .market-field input, .court-search input, .conflict-filters input, .period-row input, .period-row select { width: 100%; min-width: 0; min-height: 46px; padding: .7rem .82rem; color: var(--rubber); background: var(--white); border: 1px solid var(--control-border); border-radius: var(--radius-control); }
+.field :is(input, select, textarea):disabled, .market-field input:disabled, .court-search input:disabled { color: #52635e; background: var(--wash); opacity: 1; }
 .field textarea { min-height: 92px; resize: vertical; }
-.field small, .form-hint { color: var(--muted); font-size: .75rem; line-height: 1.45; }
+.field small, .market-field small, .form-hint { color: #52635e; font-size: .85rem; line-height: 1.45; }
 .input-with-icon { position: relative; }
 .input-with-icon > svg { position: absolute; left: .8rem; top: 50%; transform: translateY(-50%); color: #62736e; pointer-events: none; }
 .input-with-icon > input { padding-left: 2.55rem; }
 .password-toggle { position: absolute; right: .25rem; top: .2rem; display: grid; width: 40px; height: 40px; place-items: center; border: 0; background: transparent; color: #53635f; border-radius: 7px; }
-.form-stack { display: grid; gap: 1rem; }
-.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.form-stack { display: grid; gap: var(--space-md); }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
 .field-wide, .form-actions.field-wide, .form-hint.field-wide { grid-column: 1 / -1; }
 .form-actions { display: flex; gap: .6rem; align-items: center; margin-top: .4rem; }
 
@@ -108,27 +120,37 @@ a { color: inherit; }
 .notice-error { color: #762727; background: #fae1df; }
 .notice-success { color: #0c5e4b; background: #d9eee7; }
 .loading-block { display: grid; gap: .75rem; padding: 1.25rem 0; }
-.loading-block span { display: block; height: 54px; border-radius: 9px; background: #e3e8e1; animation: pulse 1.2s ease-in-out infinite alternate; }
+.loading-block span { display: block; height: 54px; border-radius: var(--radius-control); background: #e3e8e1; animation: pulse 1.2s ease-in-out infinite alternate; }
 .empty-state { display: grid; justify-items: start; gap: .45rem; min-height: 190px; padding: 2.2rem; align-content: center; color: #52635e; background: #e9ede6; border-radius: var(--radius); }
 .empty-state h3 { margin: .4rem 0 0; color: var(--rubber); font-size: 1.15rem; }
 .empty-state p { max-width: 52ch; margin: 0; line-height: 1.5; }
 .spin { animation: spin 900ms linear infinite; }
 
-.auth-layout { min-height: 100vh; display: grid; grid-template-columns: minmax(360px, 1.08fr) minmax(420px, .92fr); background: var(--white); }
-.auth-intro { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; min-height: 100vh; padding: clamp(2rem, 6vw, 6rem); color: var(--line); background: var(--court); }
-.auth-intro h1 { position: relative; z-index: 1; max-width: 10ch; margin: 0; font-size: clamp(3.6rem, 7vw, 6rem); line-height: .84; letter-spacing: -.04em; font-weight: 780; }
-.auth-intro p { position: relative; z-index: 1; max-width: 46ch; margin: 1.8rem 0 0; color: #d8eeea; font-size: 1rem; line-height: 1.6; }
-.court-corner { position: absolute; width: min(62vw, 700px); aspect-ratio: 1.8; right: -18%; top: 8%; border: 5px solid rgba(247,245,233,.8); transform: rotate(-7deg); }
-.court-corner::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 5px solid rgba(247,245,233,.8); }
-.court-corner span:first-child { position: absolute; inset: 22% 0; border-top: 5px solid rgba(247,245,233,.8); border-bottom: 5px solid rgba(247,245,233,.8); }
-.court-corner span:nth-child(2) { position: absolute; inset: 22% 25%; border-left: 5px solid rgba(247,245,233,.8); border-right: 5px solid rgba(247,245,233,.8); }
-.court-corner span:last-child { position: absolute; width: 28px; height: 28px; right: 24%; top: 18%; border-radius: 50%; background: var(--ball); }
-.auth-form-wrap { width: min(480px, calc(100% - 4rem)); align-self: center; justify-self: center; padding: 3rem 0; }
-.auth-switch { display: inline-flex; padding: 4px; margin-bottom: 2.6rem; background: var(--wash); border-radius: 10px; }
-.auth-switch button { min-height: 38px; padding: .45rem .8rem; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font-weight: 650; }
+.status-badge { display: inline-flex; align-items: center; width: max-content; max-width: 100%; padding: .36rem .65rem; border-radius: var(--radius-pill); font-size: .85rem; font-weight: 700; line-height: 1.2; white-space: normal; }
+.status-badge-positive { color: #145c48; background: #d9ede3; }
+.status-badge-warning { color: #684c12; background: #f3e7bc; }
+.status-badge-negative { color: #842f2f; background: #f6dfdd; }
+.status-badge-neutral { color: #42564b; background: #e2e8df; }
+
+.auth-layout { width: min(1080px, calc(100% - 4rem)); display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); margin: 2.5rem auto 4rem; overflow: hidden; background: var(--white); border: 1px solid var(--rule); border-radius: var(--radius); }
+.auth-intro { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-height: 570px; padding: clamp(2rem, 4vw, 3.5rem); color: var(--line); background: var(--court); }
+.auth-intro h1 { position: relative; z-index: 1; max-width: 11ch; margin: 0; font-size: clamp(2.65rem, 3.8vw, 3.6rem); line-height: 1; letter-spacing: -.035em; font-weight: 760; }
+.auth-intro p { position: relative; z-index: 1; max-width: 38ch; margin: 1.2rem 0 0; color: #d8eeea; font-size: 1rem; line-height: 1.5; }
+.court-corner { position: absolute; width: 440px; aspect-ratio: 1.8; right: -48%; bottom: -10%; border: 2px solid rgba(247,245,233,.34); transform: rotate(-7deg); }
+.court-corner::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 2px solid rgba(247,245,233,.34); }
+.court-corner span:first-child { position: absolute; inset: 22% 0; border-top: 2px solid rgba(247,245,233,.34); border-bottom: 2px solid rgba(247,245,233,.34); }
+.court-corner span:nth-child(2) { position: absolute; inset: 22% 25%; border-left: 2px solid rgba(247,245,233,.34); border-right: 2px solid rgba(247,245,233,.34); }
+.court-corner span:last-child { position: absolute; width: 16px; height: 16px; right: 24%; top: 18%; border-radius: 50%; background: var(--ball); }
+.auth-form-wrap { width: min(490px, calc(100% - 3rem)); align-self: center; justify-self: center; padding: var(--space-xl) 0; }
+.auth-switch { display: inline-flex; padding: 4px; margin-bottom: var(--space-lg); background: var(--wash); border-radius: var(--radius-control); }
+.auth-switch button { min-height: 44px; padding: .55rem .9rem; border: 0; border-radius: var(--radius-control); color: #45564e; background: transparent; font-weight: 680; }
 .auth-switch button[aria-selected="true"] { color: var(--white); background: var(--rubber); }
-.auth-form-wrap h2 { margin: 0; font-size: 2rem; letter-spacing: -.035em; }
-.form-lead { margin: .65rem 0 1.6rem; color: var(--muted); line-height: 1.5; }
+.auth-form-wrap h2 { margin: 0; font-size: clamp(2rem, 3vw, 2.45rem); line-height: 1.1; letter-spacing: -.035em; }
+.auth-form-wrap .form-stack { gap: var(--space-md); }
+.auth-form-wrap .form-stack > .button { margin-top: var(--space-xs); }
+.auth-form-wrap #auth-password { padding-right: 3rem; }
+.auth-booking-context { margin: 0 0 var(--space-lg); padding: var(--space-md); color: #164c6e; background: #e0edf5; border-radius: var(--radius-control); font-size: .9rem; line-height: 1.5; }
+.form-lead { margin: .55rem 0 var(--space-lg); color: var(--muted); line-height: 1.5; }
 
 .booking-layout { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) 328px; background: var(--paper); }
 .booking-stage { min-width: 0; padding: 3rem clamp(1.4rem, 4vw, 4rem) 4rem; }
@@ -165,6 +187,7 @@ a { color: inherit; }
 .ticket-stub { display: flex; justify-content: space-between; padding: .6rem .35rem 1rem; color: #50605b; font-size: .76rem; border-bottom: 1px dashed #8c9994; }
 .ticket-stub strong { color: var(--rubber); }
 .ticket-body { padding: 1.5rem .35rem 1rem; }
+.ticket-body h3 { margin: 0 0 .85rem; font-size: .9rem; }
 .ticket-date { margin: 0; color: var(--muted); text-transform: capitalize; }
 .ticket-time { display: block; margin: .7rem 0 1.5rem; font-size: 4.2rem; line-height: .9; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
 .ticket-body dl, .conflict-detail dl { display: grid; margin: 0; }
@@ -179,15 +202,31 @@ a { color: inherit; }
 .ticket-success h2 { margin: 1rem 0 .5rem; }.ticket-success p { margin: 0; color: var(--muted); line-height: 1.45; }
 .success-time { margin: 1.8rem 0; font-size: 4rem; line-height: 1; font-weight: 760; font-variant-numeric: tabular-nums; }
 
-.booking-list { display: grid; gap: .65rem; }
-.booking-row { position: relative; display: grid; grid-template-columns: 110px minmax(220px, 1fr) auto minmax(110px, auto); gap: 1.2rem; align-items: center; min-height: 116px; padding: 1rem 1.1rem; background: var(--white); border-radius: var(--radius); box-shadow: 0 8px 22px rgba(21,37,33,.07); content-visibility: auto; }
-.booking-row time { display: grid; align-self: stretch; align-content: center; padding-right: 1rem; border-right: 1px solid var(--rule); }
-.booking-row time strong { font-size: 1.05rem; text-transform: capitalize; }.booking-row time span { margin-top: .25rem; font-size: 1.65rem; font-weight: 740; font-variant-numeric: tabular-nums; }
-.booking-place h2 { margin: 0 0 .35rem; font-size: 1.05rem; }.booking-place p { display: flex; align-items: center; gap: .35rem; margin: .2rem 0; color: var(--muted); font-size: .8rem; }
-.booking-status { justify-self: end; padding: .4rem .6rem; border-radius: 999px; color: #0f5d4a; background: #dcece6; font-size: .72rem; font-weight: 700; }
-.status-cancelada .booking-status { color: #832f2f; background: #f6dfdd; }.status-completada .booking-status { color: #4d5b57; background: #e2e7e3; }
-.inline-confirm { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .45rem; max-width: 300px; }.inline-confirm span { flex-basis: 100%; text-align: right; font-size: .77rem; }
-.row-error { grid-column: 2 / -1; display: flex; gap: .4rem; color: #9b3232; font-size: .78rem; }
+.my-bookings-page .page-heading { margin-bottom: var(--space-xl); }
+.my-bookings-page .page-heading h1 { font-size: clamp(2.25rem, 3.5vw, 2.75rem); }
+.my-bookings-page .empty-state { background: var(--white); border: 1px solid var(--rule); }
+.my-bookings-page .empty-state .button { margin-top: var(--space-md); }
+.booking-no-upcoming { margin: 0 0 var(--space-xl); padding: 0 0 var(--space-md); border-bottom: 1px solid var(--rule); color: #42564b; }
+.booking-no-upcoming a { margin-left: .3rem; color: var(--court-deep); font-weight: 700; text-underline-offset: 3px; }
+.booking-list { display: grid; gap: var(--space-sm); }
+.booking-section { margin-top: var(--space-xl); }
+.booking-section:first-of-type { margin-top: 0; }
+.booking-section > h2 { margin: 0 0 var(--space-md); font-size: 1.5rem; line-height: 1.2; letter-spacing: -.02em; }
+.booking-row { display: grid; grid-template-columns: 185px minmax(0, 1fr) minmax(145px, auto) 160px; gap: var(--space-md); align-items: center; min-height: 112px; padding: var(--space-md) var(--space-lg); background: var(--white); border: 1px solid var(--rule); border-radius: var(--radius); }
+.booking-row.status-cancelada, .booking-row.status-completada { background: #f8f9f4; }
+.booking-row time { display: grid; align-content: center; gap: .25rem; align-self: stretch; padding-right: var(--space-md); border-right: 1px solid var(--rule); }
+.booking-row time strong { font-size: .85rem; text-transform: capitalize; }.booking-row time span { font-size: 1.3rem; font-weight: 740; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.booking-place { min-width: 0; }.booking-place h2 { margin: .2rem 0 0; font-size: 1.18rem; line-height: 1.25; overflow-wrap: anywhere; }.booking-place .booking-facility { display: flex; align-items: center; gap: .35rem; margin: 0; color: var(--court-deep); font-size: .9rem; font-weight: 650; overflow-wrap: anywhere; }
+.booking-outcome { display: grid; justify-items: start; gap: .55rem; min-width: 0; }
+.booking-outcome .booking-price { color: var(--rubber); font-size: 1rem; line-height: 1.2; font-weight: 730; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.booking-actions { display: flex; justify-content: flex-end; }
+.booking-actions.is-confirming { grid-column: 2 / -1; grid-row: 2; justify-content: stretch; }
+.booking-confirmation { width: 100%; padding: var(--space-md); background: #f9ebe8; border-radius: var(--radius-control); }
+.booking-confirmation strong { color: #762727; font-size: .9rem; }
+.booking-confirmation p { margin: .3rem 0 var(--space-sm); color: #762727; font-size: .85rem; line-height: 1.5; }
+.booking-confirmation > div { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.inline-confirm { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .45rem; max-width: 300px; }.inline-confirm strong, .inline-confirm span { flex-basis: 100%; text-align: right; font-size: .77rem; }.inline-confirm strong { font-size: .82rem; }
+.row-error { grid-column: 2 / -1; display: flex; gap: .4rem; color: #842f2f; font-size: .85rem; }
 .load-more { display: flex; margin: 1.2rem auto 0; }
 
 .admin-page { --admin-rule: #c5cdc6; }
@@ -227,72 +266,127 @@ a { color: inherit; }
 /* Public marketplace: the court diagram remains the shared product signature. */
 .market-frame { min-height: 100vh; background: var(--paper); }
 .market-header { position: sticky; top: 0; z-index: 30; color: var(--line); background: var(--rubber); }
-.market-header-inner { width: min(1360px, calc(100% - 4rem)); min-height: 76px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.market-header-inner { width: min(1280px, calc(100% - 4rem)); min-height: 72px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
 .market-header .brand { flex: 0 0 auto; }
 .market-header .brand-mark { width: 38px; height: 38px; }
-.market-nav { display: flex; align-items: center; gap: 1.35rem; flex: 1; }
-.market-nav-link { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; color: #d5dfda; background: transparent; border: 0; text-decoration: none; font-weight: 600; font-size: .88rem; white-space: nowrap; }
-.market-nav-link:hover, .market-nav-link.active { color: var(--ball); }
+.market-nav { display: flex; align-items: center; gap: 1.15rem; flex: 1; }
+.market-nav-link { position: relative; display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; color: #d5dfda; background: transparent; border: 0; text-decoration: none; font-weight: 600; font-size: .88rem; white-space: nowrap; }
+.market-nav-link:hover, .market-nav-link.active { color: var(--white); }
+.market-nav-link.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 2px; background: var(--ball); }
+.market-nav-link:focus-visible { border-radius: var(--radius-control); }
 .market-account { display: flex; align-items: center; gap: 1.2rem; margin-left: auto; }
-.market-account-name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--line); font-size: .85rem; font-weight: 700; }
-.market-register { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: .5rem .9rem; border-radius: 8px; color: var(--rubber); background: var(--ball); text-decoration: none; font-size: .86rem; font-weight: 720; white-space: nowrap; }
-.market-register:hover { background: #e2ef66; }
-.market-menu-button { display: none; color: var(--line); }
+.market-account-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: var(--space-md); border-left: 1px solid #52655e; color: #d5dfda; font-size: .85rem; font-weight: 650; }
+.market-register { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .5rem .9rem; border: 1px solid #839b8c; border-radius: var(--radius-control); color: var(--line); text-decoration: none; font-size: .86rem; font-weight: 680; white-space: nowrap; }
+.market-register:hover { background: #263c35; }
+.market-menu-button { display: none; color: var(--line); width: 44px; height: 44px; }
 .market-main { min-width: 0; }
 .market-home, .market-detail-page, .court-detail-page, .owner-intro-page { width: min(1280px, calc(100% - 4rem)); margin-inline: auto; }
-.market-hero { position: relative; display: flex; align-items: center; min-height: 400px; overflow: hidden; padding: 3.6rem clamp(2rem, 6vw, 5.5rem) 5.5rem; color: var(--line); background: var(--court); }
+.market-hero { position: relative; display: flex; align-items: center; min-height: 320px; overflow: hidden; padding: 2.5rem clamp(2rem, 5vw, 4rem) 4.5rem; color: var(--line); background: var(--court); }
 .market-hero-copy { position: relative; z-index: 2; max-width: 700px; }
-.market-hero h1 { max-width: 11ch; margin: 0; font-size: clamp(3.2rem, 6.3vw, 6.4rem); font-weight: 790; line-height: .88; letter-spacing: -.052em; }
-.market-hero p { max-width: 48ch; margin: 1.5rem 0 0; color: #daeee8; line-height: 1.55; font-size: 1rem; }
-.hero-field { position: absolute; width: 44%; height: 88%; right: -8%; top: 5%; transform: rotate(-12deg); border: 3px solid rgba(247,245,233,.65); }
-.hero-field::before, .hero-field::after, .hero-field i { content: ""; position: absolute; border-color: rgba(247,245,233,.65); }
+.market-hero h1 { max-width: 14ch; margin: 0; font-size: clamp(2.75rem, 5vw, 4.75rem); font-weight: 760; line-height: 1; letter-spacing: -.035em; }
+.market-hero p { max-width: 48ch; margin: 1rem 0 0; color: #daeee8; line-height: 1.55; font-size: 1rem; }
+.hero-field { position: absolute; width: 35%; height: 78%; right: -9%; top: 12%; transform: rotate(-12deg); border: 2px solid rgba(247,245,233,.38); }
+.hero-field::before, .hero-field::after, .hero-field i { content: ""; position: absolute; border-color: rgba(247,245,233,.38); }
 .hero-field::before { top: 50%; left: 0; right: 0; border-top: 3px solid; }
 .hero-field::after { left: 50%; top: 0; bottom: 0; border-left: 3px solid; }
 .hero-field i:first-child { inset: 16% 22%; border: 3px solid; }.hero-field i:nth-child(2) { top: 16%; bottom: 16%; left: 50%; border-left: 3px solid; }.hero-field i:last-child { width: 34px; height: 34px; top: 11%; left: 18%; border-radius: 50%; background: var(--ball); border: 0; }
-.market-search-section { position: relative; z-index: 2; margin: -3rem clamp(1rem, 4vw, 3.5rem) 0; padding: 1.6rem 1.8rem 1.7rem; background: var(--white); box-shadow: var(--shadow); border-radius: 12px; }
+.market-search-section { position: relative; z-index: 2; margin: -2.25rem clamp(1rem, 4vw, 3.5rem) 0; padding: var(--space-lg); background: var(--white); box-shadow: var(--shadow); border-radius: var(--radius); }
 .market-search-heading, .market-results-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.2rem; }
 .market-search-heading h2, .market-results-heading h2 { margin: 0; font-size: clamp(1.5rem, 2.8vw, 2.15rem); letter-spacing: -.035em; line-height: 1.1; }
 .market-search-heading p, .market-results-heading p { margin: .45rem 0 0; color: var(--muted); line-height: 1.45; font-size: .9rem; }
-.market-search-heading > svg { color: var(--court); flex-shrink: 0; }
-.market-search-form { display: grid; grid-template-columns: minmax(160px, 1.45fr) minmax(130px, .85fr) minmax(130px, .85fr) minmax(160px, .85fr) auto; gap: .75rem; align-items: start; margin-top: 1.5rem; }
-.market-field { display: grid; gap: .42rem; min-width: 0; color: #44534f; font-size: .78rem; font-weight: 680; }
-.market-field input { min-width: 0; width: 100%; min-height: 46px; padding: .7rem .8rem; color: var(--rubber); background: var(--paper); border: 1px solid #b8c3bc; border-radius: 8px; }
-.market-field small { line-height: 1.3; font-weight: 450; color: var(--muted); }
-.market-search-actions { display: flex; gap: .4rem; padding-top: 1.35rem; }
+.market-search-form { display: grid; gap: var(--space-md); margin-top: var(--space-lg); }
+.market-search-primary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--space-sm); }
+.market-search-primary > .button { min-width: 132px; }
+.market-filter-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: .35rem .75rem; padding-top: var(--space-md); border-top: 1px solid var(--rule); font-size: .85rem; }
+.market-filter-heading strong { color: var(--rubber); }
+.market-filter-heading span { color: var(--muted); }
+.market-filter-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: start; gap: var(--space-sm); }
+.market-clear { align-self: start; margin-top: 1.45rem; }
+.market-field { min-width: 0; }
 .market-input-error { margin: .75rem 0 0; color: #992c2c; font-size: .85rem; }
-.market-results { padding: 4.5rem 0 2rem; }
+.market-results { padding: var(--space-xl) 0 var(--space-xl); }
 .market-view-switch { display: inline-flex; flex: 0 0 auto; padding: 4px; border-radius: 9px; background: #e4e9df; }
 .market-view-switch button { min-height: 38px; padding: .45rem .85rem; color: #45564e; background: transparent; border: 0; border-radius: 6px; font-size: .84rem; font-weight: 650; }
 .market-view-switch button[aria-pressed="true"] { color: var(--line); background: var(--rubber); }
-.market-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.3rem; margin-top: 1.6rem; }
-.listing-card { min-width: 0; display: grid; grid-template-columns: minmax(142px, 38%) 1fr; min-height: 220px; overflow: hidden; color: var(--rubber); background: var(--white); border: 1px solid var(--rule); border-radius: 12px; text-decoration: none; transition: border-color 160ms ease-out, transform 160ms ease-out; }
-.listing-card:hover { border-color: var(--court); transform: translateY(-2px); }
+.market-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); margin-top: var(--space-lg); }
+.listing-card { min-width: 0; display: grid; grid-template-columns: minmax(120px, 30%) minmax(0, 1fr); min-height: 204px; overflow: hidden; color: var(--rubber); background: var(--white); border: 1px solid var(--rule); border-radius: var(--radius); text-decoration: none; transition: border-color 160ms ease-out, background 160ms ease-out; }
+.listing-card:hover { border-color: var(--court); background: #fffefb; }
 .listing-illustration { position: relative; display: grid; align-items: end; overflow: hidden; padding: 1.2rem; color: var(--line); background: var(--court); }
-.listing-illustration.is-court { background: var(--zone); }
+.listing-illustration.is-court { background: var(--court-deep); }
 .listing-field { position: absolute; inset: 17% 13%; border: 2px solid rgba(247,245,233,.78); }
 .listing-field::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 2px solid rgba(247,245,233,.78); }
 .listing-field::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px solid rgba(247,245,233,.78); }
 .listing-field i:first-child { position: absolute; inset: 18% 20%; border: 2px solid rgba(247,245,233,.78); }.listing-field i:nth-child(2) { position: absolute; top: 18%; bottom: 18%; left: 50%; border-left: 2px solid rgba(247,245,233,.78); }.listing-field i:last-child { position: absolute; width: 16px; height: 16px; top: 14%; right: 18%; border-radius: 50%; background: var(--ball); }
 .listing-sport { position: relative; z-index: 1; max-width: 15ch; color: var(--line); font-size: .8rem; font-weight: 700; line-height: 1.2; }
-.listing-content { display: flex; flex-direction: column; min-width: 0; padding: 1.25rem 1.35rem 1rem; }
-.listing-location, .detail-location { display: inline-flex; align-items: center; gap: .3rem; color: var(--court); font-size: .8rem; font-weight: 690; }
-.listing-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-top: .5rem; }.listing-title-row h3 { margin: 0; font-size: clamp(1.12rem, 1.65vw, 1.55rem); line-height: 1.14; letter-spacing: -.025em; }.listing-title-row svg { flex: 0 0 auto; color: var(--court); }
-.listing-content > p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: .65rem 0 1rem; color: var(--muted); font-size: .82rem; line-height: 1.45; }
-.listing-footer { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-top: auto; padding-top: .8rem; border-top: 1px solid var(--rule); font-size: .76rem; }
+.listing-content { display: flex; flex-direction: column; min-width: 0; padding: 1.15rem var(--space-lg); }
+.listing-location, .detail-location { display: inline-flex; align-items: center; gap: .3rem; color: var(--court); font-size: .85rem; font-weight: 690; overflow-wrap: anywhere; }
+.listing-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; margin-top: .45rem; }.listing-title-row h3 { margin: 0; font-size: clamp(1.2rem, 1.7vw, 1.45rem); line-height: 1.2; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.listing-court-sport { width: max-content; max-width: 100%; margin-top: .4rem; color: var(--court-deep); font-size: .85rem; font-weight: 680; }
+.listing-content > p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: .55rem 0 var(--space-sm); color: var(--muted); font-size: .9rem; line-height: 1.5; }
+.listing-footer { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .35rem .65rem; margin-top: auto; padding-top: var(--space-sm); border-top: 1px solid var(--rule); font-size: .85rem; }
 .listing-footer span { color: var(--muted); }.listing-footer strong { font-size: .95rem; font-variant-numeric: tabular-nums; }
+.listing-card-facility { min-height: 204px; }
+.listing-card-facility .listing-footer strong { font-size: 1.05rem; }
+.listing-card-court .listing-footer strong { font-size: 1.05rem; }
+.listing-card-action { display: inline-flex; align-items: center; gap: .3rem; align-self: flex-start; margin-top: var(--space-sm); color: var(--court-deep); font-size: .85rem; font-weight: 700; }
+.listing-card:hover .listing-card-action, .listing-card:focus-visible .listing-card-action { text-decoration: underline; text-underline-offset: 3px; }
 .owner-cta { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin: 2.5rem 0 5rem; padding: 2rem clamp(1.5rem, 4vw, 3.5rem); background: #dce7dd; border-radius: 12px; }.owner-cta h2 { max-width: 20ch; margin: 0; font-size: clamp(1.5rem, 2.5vw, 2.15rem); line-height: 1.1; letter-spacing: -.035em; }.owner-cta p { max-width: 50ch; margin: .5rem 0 0; color: var(--muted); font-size: .88rem; line-height: 1.45; }
-.market-detail-page { padding: 2.2rem 0 5rem; }
-.market-detail-hero { position: relative; overflow: hidden; display: flex; align-items: center; min-height: 300px; padding: clamp(2rem, 5vw, 4rem); color: var(--line); background: var(--rubber); }
-.detail-hero-content { position: relative; z-index: 1; max-width: 750px; }.detail-location { color: var(--ball); }.market-detail-hero h1 { margin: .65rem 0 0; font-size: clamp(2.6rem, 5.5vw, 5rem); line-height: .95; letter-spacing: -.048em; }.market-detail-hero p { max-width: 60ch; margin: 1.1rem 0; line-height: 1.55; }.market-detail-hero address { font-size: .9rem; color: #c9d9d2; font-style: normal; }
+.market-detail-page { padding: var(--space-lg) 0 4rem; }
+.market-detail-hero { position: relative; overflow: hidden; display: flex; align-items: center; min-height: 218px; padding: clamp(1.5rem, 4vw, 2.75rem); color: var(--line); background: var(--rubber); }
+.detail-hero-content { position: relative; z-index: 1; max-width: 750px; }.detail-location { color: var(--ball); }.market-detail-hero h1 { margin: .5rem 0 0; font-size: clamp(2.3rem, 4.5vw, 3.9rem); line-height: 1; letter-spacing: -.038em; overflow-wrap: anywhere; }.market-detail-hero p { max-width: 60ch; margin: .8rem 0 0; line-height: 1.5; }
+.facility-address { display: flex; align-items: baseline; flex-wrap: wrap; gap: .35rem .65rem; padding: var(--space-md) clamp(1.5rem, 4vw, 2.75rem); color: var(--rubber); background: var(--white); border: 1px solid var(--rule); border-top: 0; font-size: .9rem; }
+.facility-address svg { flex: 0 0 auto; align-self: center; color: var(--court); }
+.facility-address > span { color: var(--muted); }
+.facility-address address { font-style: normal; font-weight: 650; }
 .detail-field { position: absolute; right: -5%; top: -20%; width: 40%; height: 130%; transform: rotate(-14deg); border: 2px solid #76958a; }.detail-field::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 2px solid #76958a; }.detail-field::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px solid #76958a; }.detail-field i:first-child { position: absolute; inset: 15% 22%; border: 2px solid #76958a; }
-.detail-list-section { padding-top: 3rem; }
-.court-detail-intro { padding: 2.2rem 0 1.3rem; }.court-detail-heading { display: flex; justify-content: space-between; align-items: end; gap: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--rule); }.court-detail-heading h1 { margin: .65rem 0 0; font-size: clamp(2.6rem, 5vw, 4.7rem); line-height: .94; letter-spacing: -.05em; }.court-detail-heading p { max-width: 58ch; margin: .9rem 0; color: var(--muted); line-height: 1.5; }
+.detail-list-section { padding-top: var(--space-xl); }
+.court-detail-intro { padding: var(--space-lg) 0 var(--space-md); }.court-detail-heading { display: flex; justify-content: space-between; align-items: center; gap: 2rem; padding-bottom: var(--space-lg); border-bottom: 1px solid var(--rule); }.court-detail-heading > div:first-child { min-width: 0; }.court-detail-heading h1 { margin: .45rem 0 0; font-size: clamp(2.3rem, 4.3vw, 3.8rem); line-height: 1; letter-spacing: -.038em; overflow-wrap: anywhere; }.court-detail-heading p { max-width: 58ch; margin: .65rem 0; color: var(--muted); line-height: 1.5; }
+.sport-meta { color: var(--court-deep); font-weight: 720; font-size: .85rem; }
 .sport-pill { display: inline-block; padding: .4rem .65rem; border-radius: 5px; color: var(--white); background: var(--zone); font-weight: 700; font-size: .78rem; }
-.court-prices { display: grid; min-width: 230px; padding: 1rem 1.2rem; color: var(--line); background: var(--rubber); border-radius: 10px; }.court-prices > span { padding-bottom: .5rem; color: #c9d9d2; font-size: .76rem; }.court-prices > div { display: flex; justify-content: space-between; gap: 1rem; padding: .55rem 0; border-top: 1px solid #486058; font-size: .82rem; }.court-prices strong { font-variant-numeric: tabular-nums; }
-.court-detail-page .booking-layout { min-height: 560px; grid-template-columns: minmax(0, 1fr) 328px; margin-bottom: 4rem; }.court-detail-page .booking-stage { padding: 1.4rem 1.5rem 2rem 0; }.court-detail-page .booking-ticket { top: 92px; height: min(660px, calc(100vh - 108px)); border: 1px solid #cad2ca; border-radius: 10px; }.court-detail-page .booking-hero h2 { max-width: 15ch; margin: 0; font-size: clamp(2rem, 3.6vw, 3.5rem); line-height: .98; letter-spacing: -.04em; }.court-detail-page .court-search { grid-template-columns: minmax(190px, 1fr) auto; }.slot-price { font-size: .95rem; font-weight: 750; font-variant-numeric: tabular-nums; }.success-price { display: block; margin-bottom: 1.25rem; font-size: 1.25rem; }.ticket-success .button + .button { margin-top: .6rem; }
+.court-prices { display: grid; min-width: 235px; padding: var(--space-md) var(--space-lg); color: var(--rubber); background: var(--white); border: 1px solid var(--rule); border-radius: var(--radius); }.court-prices > span { padding-bottom: .45rem; color: var(--muted); font-size: .85rem; font-weight: 700; }.court-prices > div { display: flex; justify-content: space-between; gap: 1rem; padding: .55rem 0; border-top: 1px solid var(--rule); font-size: .85rem; }.court-prices strong { font-variant-numeric: tabular-nums; }
+.court-detail-page .booking-layout { min-height: 0; grid-template-columns: minmax(0, 1fr) 310px; align-items: start; gap: var(--space-lg); margin-bottom: 4rem; }
+.court-detail-page .booking-stage { padding: var(--space-lg) 0 0; }
+.court-detail-page .booking-ticket { position: sticky; top: 88px; height: auto; min-height: 350px; max-height: calc(100vh - 104px); overflow-y: auto; padding: var(--space-lg); border: 1px solid var(--rule); border-radius: var(--radius); }
+.court-detail-page .booking-hero { margin-bottom: var(--space-md); }
+.court-detail-page .booking-hero h2 { max-width: 21ch; margin: 0; font-size: clamp(1.75rem, 2.7vw, 2.6rem); line-height: 1.1; letter-spacing: -.03em; }
+.court-detail-page .court-search { grid-template-columns: minmax(190px, 1fr) auto; border: 1px solid var(--rule); box-shadow: none; }
+.court-search small { color: var(--muted); font-size: .85rem; line-height: 1.4; }
+.court-detail-page .availability-wrap { min-height: 0; padding: var(--space-lg); color: var(--rubber); background: var(--wash); border: 1px solid var(--rule); border-radius: var(--radius); box-shadow: none; }
+.court-detail-page .availability-wrap::before { inset: 14px; border: 1px solid rgba(14, 102, 91, .12); }
+.court-detail-page .availability-wrap::after { display: none; }
+.court-detail-page .availability-meta { align-items: center; flex-wrap: wrap; margin: 0 0 var(--space-lg); gap: .35rem .7rem; }
+.court-detail-page .availability-meta strong { font-size: 1.25rem; text-transform: capitalize; }
+.court-detail-page .availability-meta small { margin-left: auto; color: #4a5c55; font-size: .85rem; }
+.duration-picker { position: relative; z-index: 2; display: grid; gap: var(--space-sm); margin: 0 0 var(--space-lg); }
+.duration-picker > span { color: var(--rubber); font-size: .9rem; font-weight: 720; }
+.duration-picker > div { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.duration-picker button { min-height: 72px; min-width: 128px; display: grid; align-content: center; justify-items: start; gap: .1rem; padding: .55rem .85rem; color: var(--rubber); background: var(--white); border: 1px solid var(--control-border); border-radius: var(--radius-control); font-size: .85rem; text-align: left; }
+.duration-picker button:hover { border-color: var(--court); }
+.duration-picker button[aria-pressed="true"] { background: var(--white); border: 2px solid var(--court); padding: calc(.55rem - 1px) calc(.85rem - 1px); }
+.duration-picker button strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.duration-picker button small { color: var(--court-deep); font-size: .76rem; font-weight: 720; }
+.slots-label { position: relative; z-index: 2; margin: 0 0 var(--space-sm); color: var(--rubber); font-size: .9rem; font-weight: 720; }
+.court-detail-page .court-options { grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); max-height: none; overflow: visible; gap: var(--space-sm); padding: .25rem; }
+.selection-jump { display: none; }
+.court-detail-page .slot-option { min-height: 96px; padding: .85rem; color: var(--rubber); background: var(--white); border: 1px solid var(--control-border); border-radius: var(--radius-control); }
+.court-detail-page .slot-option:hover { color: var(--rubber); background: #edf3f0; border-color: var(--court); }
+.court-detail-page .slot-option.selected { color: var(--rubber); background: var(--ball); border-color: var(--rubber); }
+.slot-price { font-size: .9rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.court-detail-page .availability-wrap .empty-state { margin: 0; color: var(--muted); background: var(--white); }
+.court-detail-page .availability-wrap .empty-state h3 { color: var(--rubber); }
+.court-detail-page .ticket-body { padding: var(--space-lg) 0 var(--space-md); }
+.court-detail-page .ticket-time { margin: var(--space-sm) 0 var(--space-lg); font-size: 1.75rem; line-height: 1.2; letter-spacing: -.025em; white-space: nowrap; }
+.court-detail-page .ticket-body dt, .court-detail-page .ticket-body dd { font-size: .85rem; overflow-wrap: anywhere; }
+.court-detail-page .ticket-body dd { min-width: 0; }
+.court-detail-page .ticket-body dl div:last-child dd { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.court-detail-page .ticket-success { min-height: 320px; }
+.court-detail-page .success-time { margin: var(--space-lg) 0 var(--space-sm); font-size: 2.4rem; }
+.success-price { display: block; margin-bottom: var(--space-lg); font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.ticket-success .button + .button { margin-top: var(--space-xs); }
+.notice-info { color: #164c6e; background: #e0edf5; }
+.notice-warning { color: #62450e; background: #f5ebc8; }
 .price-update-notice { margin: 1.1rem 0; }
-.booking-price { color: var(--rubber) !important; font-size: .91rem !important; font-weight: 730; font-variant-numeric: tabular-nums; }
-.market-main .auth-layout { min-height: calc(100vh - 76px); }.market-main .auth-intro { min-height: calc(100vh - 76px); }
+.market-main .auth-layout { min-height: 0; }.market-main .auth-intro { min-height: 570px; }
 .owner-intro-page { padding: 2rem 0 5rem; }.owner-intro-panel { min-height: 55vh; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(2rem, 6vw, 5rem); color: var(--line); background: var(--court); }.owner-intro-panel h1 { max-width: 12ch; margin: 0; font-size: clamp(2.7rem, 5vw, 5rem); line-height: .94; letter-spacing: -.048em; }.owner-intro-panel p { max-width: 54ch; line-height: 1.55; }.owner-intro-panel .button { margin-top: 1rem; }
 
 /* Owner onboarding stays in the marketplace language; operations stay deliberately quieter. */
@@ -315,6 +409,12 @@ a { color: inherit; }
 
 .owner-facility-count { color: var(--muted); font-size: .76rem; font-weight: 650; }
 .owner-dashboard-list { display: grid; gap: 1.2rem; }.owner-dashboard-facility { overflow: hidden; background: var(--white); border: 1px solid var(--rule); border-radius: 10px; }.owner-dashboard-facility > header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; padding: 1.3rem 1.5rem; border-bottom: 1px solid var(--rule); }.owner-dashboard-facility h3 { margin: .35rem 0 .6rem; font-size: 1.35rem; letter-spacing: -.025em; }.owner-readiness { display: grid; grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); gap: 1.2rem; padding: 1.2rem 1.5rem; background: #f0f3ed; }.owner-readiness h4 { margin: 0; font-size: 1rem; }.owner-readiness p { margin: .35rem 0 0; color: var(--muted); font-size: .78rem; line-height: 1.45; }.owner-readiness ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem .9rem; padding: 0; margin: 0; list-style: none; }.owner-readiness li { display: flex; align-items: center; gap: .38rem; color: #6b433d; font-size: .8rem; }.owner-readiness li svg { color: #9b5248; flex: 0 0 auto; }.owner-readiness li.complete { color: #185f4f; }.owner-readiness li.complete svg { color: var(--success); }.owner-next-action { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 1.5rem; }.owner-next-action strong { font-size: .78rem; text-transform: uppercase; letter-spacing: .045em; }.owner-next-action p { margin: .28rem 0 0; color: var(--muted); font-size: .85rem; }.price-pending { color: #8b5715 !important; font-weight: 700; }
+.owner-dashboard-facility { border-radius: var(--radius); }
+.owner-dashboard-facility > header { gap: var(--space-md); padding: 1.15rem var(--space-lg); }
+.owner-dashboard-facility h3 { margin: .35rem 0 .65rem; font-size: 1.25rem; line-height: 1.25; letter-spacing: -.02em; }
+.owner-dashboard-facility .owner-facility-city { font-size: .85rem; }
+.owner-dashboard-facility .owner-facility-states { gap: var(--space-xs); }
+.owner-dashboard-facility .owner-readiness p, .owner-dashboard-facility .owner-readiness li { font-size: .85rem; line-height: 1.5; }
 .owner-work-section { margin-bottom: 1.3rem; padding: 1.6rem; background: var(--white); border: 1px solid var(--rule); border-radius: 10px; }
 .owner-facility-detail .owner-work-section { margin: 1.5rem 0 0; padding: 1.5rem 0 0; background: transparent; border: 0; border-top: 1px solid var(--rule); border-radius: 0; }
 .owner-work-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.2rem; }.owner-work-heading h2, .owner-danger-zone h2 { margin: 0; font-size: 1.35rem; letter-spacing: -.025em; }.owner-work-heading p, .owner-danger-zone p { max-width: 64ch; margin: .35rem 0 0; color: var(--muted); font-size: .84rem; line-height: 1.45; }.owner-work-heading .button { flex: 0 0 auto; }
@@ -340,7 +440,8 @@ a { color: inherit; }
   .app-frame { grid-template-columns: 194px minmax(0, 1fr); }
   .booking-layout { grid-template-columns: minmax(0, 1fr) 290px; }
   .booking-stage { padding-inline: 1.5rem; }
-  .booking-row { grid-template-columns: 92px 1fr auto; }.booking-actions { grid-column: 2 / -1; }.booking-status { grid-column: 3; grid-row: 1; }
+  .my-bookings-page .booking-row { grid-template-columns: 155px minmax(0, 1fr) minmax(145px, auto); }
+  .my-bookings-page .booking-actions { grid-column: 2 / -1; grid-row: 2; justify-content: flex-start; }
   .court-admin-grid { grid-template-columns: 1fr; }
 }
 
@@ -353,17 +454,34 @@ a { color: inherit; }
   .rail-scrim { position: fixed; z-index: 15; inset: 0; display: block; border: 0; background: rgba(21,37,33,.45); }
   .page-standard { width: min(100% - 2rem, 680px); padding: 2rem 0 4rem; }
   .page-heading, .resource-hero { align-items: flex-start; flex-direction: column; }.page-heading h1, .resource-hero h1 { font-size: 2.2rem; }.page-actions { justify-content: flex-start; }
-  .auth-layout { grid-template-columns: 1fr; }.auth-intro { min-height: 38vh; padding: 2rem; }.auth-intro h1 { font-size: 3.2rem; }.auth-intro p { max-width: 38ch; }.court-corner { width: 90vw; right: -38%; top: 8%; }
-  .auth-form-wrap { width: min(100% - 2rem, 480px); padding: 2rem 0 4rem; }
-  .booking-layout { display: block; }.booking-stage { padding: 2rem 1rem 15rem; }.booking-hero { align-items: flex-start; flex-direction: column; }.booking-hero h1 { font-size: 3.2rem; }.live-note { display: none; }
-  .booking-ticket { position: fixed; z-index: 12; inset: auto 0 0 0; height: auto; min-height: 126px; max-height: 72vh; overflow: auto; padding: .85rem 1rem calc(.85rem + env(safe-area-inset-bottom)); border: 0; border-top: 1px solid #b9c2bb; box-shadow: 0 -16px 34px rgba(21,37,33,.16); }.booking-ticket:not(.has-selection) { display: none; }.ticket-stub { padding-top: 0; }.ticket-body { padding: 1rem 0; }.ticket-time { font-size: 2.8rem; }.booking-ticket > .button { margin-top: .4rem; }
-  .court-search { grid-template-columns: 1fr 1fr; }.button-search { grid-column: 1 / -1; }
-  .court-welcome, .availability-wrap { min-height: 430px; padding: 1rem; }.court-welcome::before, .availability-wrap::before { inset: 14px; }.court-welcome::after, .availability-wrap::after { top: 14px; bottom: 14px; }.court-options { grid-template-columns: repeat(2, minmax(115px, 1fr)); max-height: 350px; padding-inline: .5rem; }.availability-meta { margin-top: .7rem; flex-wrap: wrap; }.availability-meta small { width: 100%; margin: 0; }
-  .booking-row { grid-template-columns: 74px 1fr; gap: .8rem; }.booking-row time { padding-right: .7rem; }.booking-row time span { font-size: 1.25rem; }.booking-status { grid-column: 2; grid-row: auto; justify-self: start; }.booking-actions { grid-column: 1 / -1; }.inline-confirm { justify-content: flex-start; max-width: none; }.inline-confirm span { text-align: left; }
+  .auth-layout { width: calc(100% - 2rem); grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); margin: 1.5rem auto 3rem; }.market-main .auth-intro { min-height: 520px; padding: 1.4rem; }.auth-intro h1 { font-size: 2.6rem; }.auth-intro p { max-width: 32ch; }.auth-intro .court-corner { display: none; }
+  .auth-form-wrap { width: calc(100% - 2.5rem); padding: 2rem 0; }
+  .booking-hero { align-items: flex-start; flex-direction: column; }.live-note { display: none; }
+  .my-bookings-page .booking-row { grid-template-columns: 140px minmax(0, 1fr); gap: var(--space-sm) var(--space-md); }
+  .my-bookings-page .booking-row time { grid-row: 1 / 3; padding-right: var(--space-md); }
+  .my-bookings-page .booking-outcome, .my-bookings-page .booking-actions { grid-column: 2; }
+  .my-bookings-page .booking-actions { grid-row: 3; }
+  .inline-confirm { justify-content: flex-start; max-width: none; }.inline-confirm span { text-align: left; }
   .policy-strip { grid-template-columns: 1fr; }.policy-strip div { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.25); }
   .form-grid { grid-template-columns: 1fr; }.field-wide, .form-actions.field-wide, .form-hint.field-wide { grid-column: auto; }
   .period-row { grid-template-columns: 1fr 1fr 40px; }.period-row label:first-child:nth-last-child(4) { grid-column: 1 / -1; }.data-row { grid-template-columns: auto 1fr; }.data-row > :last-child { grid-column: 2; justify-self: start; text-align: left; }
   .conflict-filters { grid-template-columns: 1fr 1fr; }.conflict-filters .button { grid-column: 1 / -1; }.conflict-layout { grid-template-columns: 1fr; }.conflict-detail { position: static; min-height: 300px; }
+}
+
+@media (max-width: 700px) {
+  .auth-layout { display: block; width: calc(100% - 2rem); margin: var(--space-md) auto var(--space-2xl); }
+  .market-main .auth-intro { display: none; }
+  .auth-form-wrap { width: 100%; padding: var(--space-lg); }
+}
+
+@media (max-width: 560px) {
+  .my-bookings-page .booking-row { grid-template-columns: 1fr; gap: var(--space-sm); padding: var(--space-md); }
+  .my-bookings-page .booking-row time { grid-column: 1; grid-row: auto; padding: 0 0 var(--space-sm); border-right: 0; border-bottom: 1px solid var(--rule); }
+  .my-bookings-page .booking-place, .my-bookings-page .booking-outcome, .my-bookings-page .booking-actions { grid-column: 1; grid-row: auto; }
+  .my-bookings-page .booking-outcome { grid-template-columns: auto minmax(0, 1fr); justify-items: start; align-items: center; gap: var(--space-md); padding-top: var(--space-xs); }
+  .my-bookings-page .booking-actions > .button { width: 100%; }
+  .my-bookings-page .booking-confirmation > div .button { flex: 1 1 130px; }
+  .my-bookings-page .row-error { grid-column: 1; }
 }
 
 @media (max-width: 460px) {
@@ -380,43 +498,51 @@ a { color: inherit; }
 }
 
 @media (max-width: 1160px) {
-  .market-search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .market-search-actions { grid-column: 1 / -1; padding-top: .3rem; }
+  .market-filter-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .market-clear { grid-column: 1 / -1; justify-self: start; margin-top: 0; }
 }
 
 @media (max-width: 780px) {
   .market-header-inner { width: calc(100% - 2rem); min-height: 64px; }
   .market-header .brand { font-size: .92rem; }.market-header .brand-mark { width: 32px; height: 32px; }
   .market-menu-button { display: grid; }
-  .market-nav { position: absolute; top: 100%; left: 0; right: 0; display: none; align-items: stretch; flex-direction: column; gap: .15rem; padding: .9rem 1rem 1.1rem; background: var(--rubber); box-shadow: 0 20px 30px rgba(21,37,33,.25); }
-  .market-nav.is-open { display: flex; }.market-nav-link { padding: .6rem; }.market-account { width: 100%; align-items: stretch; flex-direction: column; gap: .1rem; margin: .4rem 0 0; padding-top: .4rem; border-top: 1px solid #52655e; }.market-account-name { max-width: none; padding: .6rem; }.market-register { justify-content: flex-start; margin-top: .4rem; }
   .market-home, .market-detail-page, .court-detail-page, .owner-intro-page { width: calc(100% - 2rem); }
-  .market-hero { min-height: 325px; padding: 2.5rem 1.8rem 4.2rem; }.market-hero h1 { font-size: clamp(3rem, 9vw, 5rem); }.market-hero p { max-width: 34ch; }.hero-field { width: 55%; right: -24%; }
-  .market-search-section { margin: -2.1rem .65rem 0; padding: 1.2rem; }
-  .market-results { padding-top: 3rem; }.market-results-heading { align-items: flex-start; flex-direction: column; }
+  .market-hero { min-height: 285px; padding: 2rem 1.8rem 3.5rem; }.market-hero h1 { font-size: clamp(2.75rem, 7vw, 4.25rem); }.market-hero p { max-width: 34ch; }.hero-field { width: 45%; right: -24%; }
+  .market-search-section { margin: -1.6rem .65rem 0; padding: 1.2rem; }
+  .market-results { padding-top: var(--space-xl); }.market-results-heading { align-items: flex-start; flex-direction: column; }
   .market-card-grid { grid-template-columns: 1fr; gap: .9rem; }.listing-card { min-height: 205px; }
   .owner-cta { align-items: flex-start; flex-direction: column; gap: 1rem; }.owner-cta .button { width: 100%; }
-  .market-detail-page { padding-top: 1.5rem; }.market-detail-hero { min-height: 260px; }.detail-field { width: 60%; right: -26%; }
+  .market-detail-page { padding-top: 1.5rem; }.market-detail-hero { min-height: 200px; }.detail-field { width: 42%; right: -26%; }
   .court-detail-heading { align-items: flex-start; flex-direction: column; }.court-prices { width: 100%; }
-  .court-detail-page .booking-layout { display: block; min-height: 0; }.court-detail-page .booking-stage { padding: 1rem 0 13rem; }.court-detail-page .booking-ticket { position: fixed; z-index: 12; inset: auto 0 0; top: auto; height: auto; min-height: 130px; max-height: 72vh; overflow: auto; padding: .85rem 1rem calc(.85rem + env(safe-area-inset-bottom)); border-radius: 10px 10px 0 0; box-shadow: 0 -16px 34px rgba(21,37,33,.16); }.court-detail-page .booking-ticket:not(.has-selection) { display: none; }.court-detail-page .booking-hero h2 { font-size: 2.4rem; }
+  .court-detail-page .booking-layout { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-md); }
+  .court-detail-page .booking-stage { padding: var(--space-md) 0 0; }
+  .court-detail-page .booking-ticket { position: static; width: 100%; height: auto; min-height: 0; max-height: none; overflow: visible; margin: 0; padding: var(--space-lg); box-shadow: none; }
+  .court-detail-page .booking-ticket:not(.has-selection) { display: none; }
+  .court-detail-page .booking-hero h2 { font-size: 2.1rem; }
+  .court-detail-page .court-options { max-height: none; overflow: visible; }
+  .court-detail-page .availability-meta small { width: 100%; margin-left: 0; }
+  .selection-jump { position: relative; z-index: 2; display: inline-flex; align-items: center; min-height: 44px; margin-bottom: var(--space-sm); color: var(--court-deep); font-size: .9rem; font-weight: 720; text-underline-offset: 3px; }
+  .court-detail-page .booking-ticket { scroll-margin-top: 80px; }
   .market-main .auth-intro { min-height: 300px; }
 }
 
 @media (max-width: 480px) {
-  .market-hero { min-height: 350px; }.market-hero h1 { font-size: 3.25rem; }.hero-field { width: 90%; right: -47%; opacity: .55; }
-  .market-search-form { grid-template-columns: 1fr; }.market-search-actions { grid-column: 1; flex-wrap: wrap; }.market-search-actions .button { flex: 1; }
+  .market-hero { min-height: 290px; }.market-hero h1 { font-size: clamp(2.75rem, 12vw, 3.25rem); }.hero-field { display: none; }
+  .market-search-primary { grid-template-columns: 1fr; }.market-search-primary > .button { width: 100%; }
+  .market-filter-fields { grid-template-columns: 1fr; }.market-clear { grid-column: 1; }
   .market-view-switch { width: 100%; }.market-view-switch button { flex: 1; }
-  .listing-card { grid-template-columns: 34% 1fr; min-height: 195px; }.listing-illustration { padding: .65rem; }.listing-field { inset: 18% 9%; }.listing-content { padding: 1rem; }.listing-footer strong { font-size: .84rem; }
-  .market-detail-hero { padding: 1.8rem; }.market-detail-hero h1 { font-size: 2.7rem; }
+  .listing-card { grid-template-columns: 90px minmax(0, 1fr); }.listing-illustration { padding: .65rem; }.listing-illustration .listing-sport { display: none; }.listing-field { inset: 18% 9%; }.listing-content { padding: var(--space-md); }.listing-footer strong { font-size: .95rem; }
+  .market-detail-hero { padding: var(--space-lg); }.market-detail-hero h1 { font-size: 2.5rem; }
   .court-detail-page .court-search { grid-template-columns: 1fr; }.court-detail-page .booking-hero h2 { font-size: 2rem; }
-  .court-detail-page .court-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }.court-detail-page .slot-option { padding: .7rem; }.court-detail-page .slot-price { font-size: .82rem; }
+  .court-detail-page .court-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }.court-detail-page .slot-option { padding: .7rem; }
+  .court-detail-page .duration-picker button { flex: 1 1 135px; }
 }
 
 @media (max-width: 1100px) {
   .market-header-inner { width: calc(100% - 2rem); min-height: 64px; }
   .market-menu-button { display: grid; }
-  .market-nav { position: absolute; top: 100%; left: 0; right: 0; display: none; align-items: stretch; flex-direction: column; gap: .15rem; padding: .9rem 1rem 1.1rem; background: var(--rubber); box-shadow: 0 20px 30px rgba(21,37,33,.25); }
-  .market-nav.is-open { display: flex; }.market-nav-link { padding: .6rem; }.market-account { width: 100%; align-items: stretch; flex-direction: column; gap: .1rem; margin: .4rem 0 0; padding-top: .4rem; border-top: 1px solid #52655e; }.market-account-name { max-width: none; padding: .6rem; }.market-register { justify-content: flex-start; margin-top: .4rem; }
+  .market-nav { position: absolute; top: 100%; left: 0; right: 0; display: none; align-items: stretch; flex-direction: column; gap: .15rem; max-height: calc(100dvh - 64px); overflow-y: auto; padding: .9rem 1rem 1.1rem; background: var(--rubber); box-shadow: 0 12px 26px rgba(21,37,33,.18); }
+  .market-nav.is-open { display: flex; }.market-nav-link { padding: .6rem; }.market-nav-link.active::after { right: auto; width: 3px; height: auto; top: 10px; bottom: 10px; }.market-account { width: 100%; align-items: stretch; flex-direction: column; gap: .1rem; margin: .4rem 0 0; padding-top: .4rem; border-top: 1px solid #52655e; }.market-account-name { max-width: none; padding: .6rem; border-left: 0; }.market-register { justify-content: flex-start; margin-top: .4rem; }
 }
 
 @media (max-width: 780px) {
@@ -485,10 +611,136 @@ a { color: inherit; }
 .owner-booking-outcome strong { font-size: .95rem; font-variant-numeric: tabular-nums; }.owner-booking-outcome small { margin-top: -.5rem; color: var(--muted); font-size: .72rem; }
 .owner-booking-status.status-confirmada { color: #145c48; background: #d9ede3; }.owner-booking-status.status-cancelada { color: #842f2f; background: #f6dfdd; }.owner-booking-status.status-completada { color: #42564b; background: #e2e8df; }
 
+/* Owner operations: compact state-first panels with room for dense operational data. */
+.owner-console-hero { min-height: 230px; align-items: flex-start; }
+.owner-console-hero > div { min-width: 0; }
+.owner-hero-facts { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1rem; }
+.owner-hero-facts > span:first-child { display: inline-flex; align-items: center; gap: .35rem; color: #cfddd6; font-size: .82rem; }
+.owner-hero-facts .status-badge { font-size: .75rem; }
+.owner-dashboard .owner-console-hero { min-height: 210px; }
+.owner-section-heading { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: .7rem 1.2rem; }
+.owner-section-heading > div { min-width: 0; }
+.owner-publication-copy { margin: 0; padding: .85rem 1rem; color: #465750; background: #edf1e9; border-left: 3px solid var(--court); border-radius: 0 var(--radius-control) var(--radius-control) 0; font-size: .86rem; line-height: 1.5; }
+.owner-publication-copy a { color: inherit; font-weight: 700; text-underline-offset: 3px; }
+.owner-facility-detail .owner-console-body { padding: 1.6rem; border-radius: 0 0 var(--radius) var(--radius); }
+.owner-facility-detail .owner-section-heading { margin-top: 1.8rem; }
+.owner-dashboard-facility { box-shadow: 0 1px 0 rgba(21, 37, 33, .04); }
+.owner-dashboard-facility > header { align-items: center; }
+.owner-next-action { order: 0; background: #edf5ef; border-bottom: 1px solid #d5e1d7; }
+.owner-next-action strong { color: var(--court-deep); }
+.owner-next-action .button { white-space: nowrap; }
+.owner-readiness { order: 1; background: #f6f7f2; }
+.owner-readiness-progress { color: var(--rubber) !important; font-weight: 720; }
+.owner-readiness > div > p:last-child { max-width: 46ch; }
+.owner-readiness li { padding: .2rem 0; }
+.owner-section-nav { margin-top: 1rem; background: #e7ede6; border: 1px solid #d3ddd2; box-shadow: 0 3px 9px rgba(21, 37, 33, .07); }
+.owner-facility-nav a[aria-current="location"] { color: var(--line); background: var(--rubber); }
+.owner-section-nav .owner-nav-group { gap: .25rem; }
+.owner-nav-group > span { color: #5b6c64; }
+.owner-work-section { border-radius: var(--radius); }
+.owner-work-heading p { max-width: 58ch; }
+.owner-week-board { border: 1px solid var(--rule); }
+.owner-week-board > div:nth-child(even) { background: rgba(255, 255, 255, .52); }
+.owner-price-row { background: #f5f7f2; border: 1px solid #dce4da; }
+.owner-price-row:focus-within { border-color: var(--court); box-shadow: 0 0 0 3px rgba(14, 102, 91, .12); }
+.owner-data-list { border-radius: var(--radius-control); }
+.owner-bookings-page .owner-console-hero { min-height: 220px; }
+.owner-bookings-filters { border-radius: var(--radius); }
+.owner-bookings-results .owner-section-heading { align-items: flex-start; }
+.owner-booking-row { border-radius: var(--radius); box-shadow: 0 1px 0 rgba(21, 37, 33, .04); }
+.owner-booking-when { background: var(--rubber); }
+.owner-booking-outcome .status-badge { font-size: .76rem; }
+
+/* Admin moderation: dense, neutral review surfaces with explicit state and risk. */
+.app-rail nav { gap: 1.45rem; }
+.nav-group > p { color: #91a39d; letter-spacing: .035em; text-transform: uppercase; }
+.nav-link.active { color: var(--white); background: #2a4039; }
+.nav-link.active svg { color: var(--ball); }
+.admin-page .page-heading { margin-bottom: 1.5rem; }
+.admin-page .page-heading h1 { font-size: clamp(2.25rem, 4vw, 3.25rem); }
+.admin-page .resource-list, .admin-page .data-rows, .admin-page .definition-grid, .admin-page .membership-list { border: 1px solid var(--rule); box-shadow: none; }
+.admin-page .empty-state { min-height: 145px; padding: 1.4rem; background: #f0f2ed; border: 1px solid var(--rule); border-radius: var(--radius); }
+.admin-page .filter-bar { min-height: 48px; padding: .4rem; background: #ecefe9; border: 1px solid #d5ddd5; border-radius: var(--radius-control); }
+.admin-page .filter-bar button.selected { background: var(--rubber); }
+.admin-page .filter-bar .field { min-width: min(100%, 310px); }
+.admin-page .filter-bar .field input { min-height: 40px; }
+.admin-page .resource-row { min-height: 82px; }
+.admin-page .resource-row > span:first-child { gap: .3rem; min-width: 0; }
+.admin-page .resource-row small { overflow-wrap: anywhere; }
+.admin-resource-hero { align-items: flex-start; margin-bottom: 1.25rem; padding: 1.25rem 0 1.5rem; border-bottom-width: 1px; }
+.admin-resource-hero h1 { max-width: 24ch; }
+.admin-resource-states, .admin-row-states { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.admin-resource-states { margin-top: .8rem; }
+.admin-resource-states .status-badge, .admin-row-states .status-badge { font-size: .76rem; }
+.admin-readonly-label { color: var(--muted); font-size: .78rem; font-weight: 680; }
+.admin-moderation-actions { max-width: 380px; }
+.admin-policy-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 1.2rem 0 2.2rem; color: var(--rubber); background: #edf1ec; border: 1px solid var(--rule); border-radius: var(--radius); }
+.admin-policy-strip div { min-width: 0; padding: 1rem; border-color: var(--rule); }
+.admin-policy-strip span { color: var(--muted); }
+.admin-policy-strip strong { display: flex; align-items: center; min-height: 26px; overflow-wrap: anywhere; }
+.admin-policy-strip .status-badge { font-size: .78rem; }
+.admin-page .section-block { margin-top: 2.2rem; }
+.admin-page .section-heading { margin-bottom: .8rem; }
+.admin-page .definition-grid dd { line-height: 1.45; overflow-wrap: anywhere; }
+.admin-readiness-grid dd { color: #465750; }
+.admin-facility-row { grid-template-columns: minmax(0, 1fr) minmax(180px, auto) auto; }
+.admin-facility-row > span:last-child { color: var(--court-deep); font-size: .82rem; font-weight: 720; }
+.admin-applications-list .application-row { min-height: 94px; }
+.admin-applications-list .application-row > span:first-child { gap: .28rem; }
+.admin-applications-list .application-row.is-pending { background: #fffdf4; }
+.application-detail { border-radius: var(--radius); }
+.application-detail-heading .status-badge { font-size: .78rem; }
+.application-facts { margin: 1rem 0; }
+.application-decisions { gap: 1rem; }
+.admin-decision-copy { padding: .8rem 0 0; border-top: 1px solid var(--rule); }
+.admin-decision-copy p { margin: .25rem 0 0; color: var(--muted); font-size: .82rem; line-height: 1.45; }
+.admin-membership-rows .data-row { align-items: start; }
+.admin-membership-rows .data-row > div:first-child { display: grid; gap: .55rem; }
+.admin-membership-rows small { color: var(--muted); font-size: .77rem; }
+.admin-membership-assign { padding: .9rem; background: #f0f3ed; border: 1px solid var(--rule); border-radius: var(--radius-control); }
+.membership-row .status-badge { font-size: .76rem; }
+.membership-actions > span { max-width: 260px; line-height: 1.35; }
+.court-admin .section-block > .empty-state { margin: 0; }
+.court-admin .schedule-board, .court-admin .data-rows { border: 1px solid var(--rule); }
+.conflict-row .status-badge, .conflict-detail .status-badge { font-size: .74rem; }
+.conflict-detail { background: #edf0e9; border: 1px solid var(--rule); }
+.conflict-detail > header { align-items: center; }
+
+@media (max-width: 780px) {
+  .admin-page .filter-bar { align-items: stretch; flex-wrap: wrap; }
+  .admin-page .filter-bar .field { flex: 1 1 220px; }
+  .admin-moderation-actions { max-width: none; justify-content: flex-start; }
+  .admin-policy-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-policy-strip div:nth-child(2) { border-right: 0; }
+  .admin-policy-strip div:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
+  .admin-facility-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .admin-facility-row > span:last-child { display: none; }
+  .applications-layout { gap: 1rem; }
+  .application-detail { border: 1px solid var(--rule); }
+}
+
+@media (max-width: 480px) {
+  .admin-page .page-heading { margin-bottom: 1.2rem; }
+  .admin-page .filter-bar > .button { flex: 1 1 auto; }
+  .admin-resource-hero { gap: 1rem; }
+  .admin-moderation-actions { width: 100%; }
+  .admin-moderation-actions .button { flex: 1 1 100%; }
+  .admin-policy-strip { grid-template-columns: 1fr; }
+  .admin-policy-strip div { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .admin-policy-strip div:last-child { border-bottom: 0; }
+  .admin-facility-row, .admin-applications-list .application-row { grid-template-columns: 1fr; align-items: start; }
+  .admin-facility-row .admin-row-states, .admin-applications-list .status-badge { justify-self: start; }
+  .admin-membership-rows .data-row { grid-template-columns: 1fr; }
+  .admin-membership-rows .inline-confirm { max-width: none; justify-content: flex-start; }
+}
+
 @media (max-width: 780px) {
   .owner-booking-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
   .owner-booking-outcome { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: .35rem 1rem; padding: .8rem 1.2rem; border-left: 0; border-top: 1px solid var(--rule); }
   .owner-booking-outcome small { margin: 0; }
+  .owner-console-hero { min-height: 0; }
+  .owner-section-heading { align-items: flex-start; }
+  .owner-facility-detail .owner-console-body { padding: 1.2rem; }
 }
 @media (max-width: 560px) {
   .owner-bookings-entry { align-items: stretch; flex-direction: column; }.owner-bookings-entry .button { justify-content: center; }
@@ -496,4 +748,6 @@ a { color: inherit; }
   .owner-bookings-filter-grid .field, .owner-bookings-filter-grid .field:nth-last-child(-n+2) { grid-column: 1; }
   .owner-booking-row { grid-template-columns: 1fr; }.owner-booking-when { gap: .2rem; padding: .85rem 1rem; }
   .owner-booking-where { padding: 1rem; }.owner-booking-outcome { grid-column: 1; padding: .8rem 1rem; }
+  .owner-hero-facts { align-items: flex-start; flex-direction: column; }
+  .owner-next-action .button { width: 100%; }
 }

@@ -15,7 +15,7 @@ import { createSystemClock } from '../../../backend/src/shared/clock.js';
 
 import { todayInTimeZone } from '../../src/lib/format.js';
 
-const BACKEND = 'http://localhost:3107';
+const BACKEND = 'http://localhost:3000';
 const PRICE_MINOR = 9000000;
 
 test('marketplace real: explorar → reservar con precio → cancelar', async ({ page, request }) => {
@@ -39,8 +39,8 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
     const password = 'Marketplace-E2E-2026!';
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Encuentra tu próxima cancha.' })).toBeVisible();
-    await page.getByRole('searchbox', { name: 'Busca una cancha o establecimiento' }).fill(facility.name.slice(0, 100));
+    await expect(page.getByRole('heading', { name: 'Encuentra y reserva una cancha.' })).toBeVisible();
+    await page.getByRole('searchbox', { name: 'Buscar' }).fill(facility.name.slice(0, 100));
     await page.getByLabel('Ciudad').fill(facility.city);
     await page.getByLabel('Deporte').fill(court.sportCode);
     await page.getByLabel('Precio máximo en COP').fill(String(Math.ceil(option.priceMinor / 100)));
@@ -70,8 +70,22 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
     await page.locator('.slot-option').filter({ hasText: `${option.durationMinutes} min` })
       .filter({ hasText: option.startTime.slice(0, 5) }).first().click();
     await expect(page.locator('.ticket-body')).toContainText('COP');
-    await page.getByRole('button', { name: 'Ingresar para reservar' }).click();
+    for (const width of [768, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      const layout = await page.evaluate(() => {
+        const options = document.querySelector('.court-options').getBoundingClientRect();
+        const ticket = document.querySelector('.booking-ticket');
+        return { position: getComputedStyle(ticket).position, ticketTop: ticket.getBoundingClientRect().top,
+          optionsBottom: options.bottom, documentWidth: document.documentElement.scrollWidth, viewportWidth: innerWidth };
+      });
+      expect(layout.position).toBe('static');
+      expect(layout.ticketTop).toBeGreaterThanOrEqual(layout.optionsBottom - 1);
+      expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.getByRole('button', { name: 'Iniciar sesión para confirmar' }).click();
     await expect(page).toHaveURL(/\/acceso$/);
+    await expect(page.getByText('Inicia sesión para continuar con tu reserva.', { exact: false })).toBeVisible();
     await page.getByRole('tab', { name: 'Crear cuenta' }).click();
     await page.getByLabel('Nombre').fill('Comprador Marketplace');
     await page.getByLabel('Correo').fill(email);
@@ -83,7 +97,7 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
     expect(registration.status()).toBe(201);
     buyerId = (await registration.json()).user.id;
     await page.getByLabel('Contraseña', { exact: true }).fill(password);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/canchas/${court.id}$`));
     await expect(page.getByRole('button', { name: 'Confirmar reserva' })).toBeVisible();
     await expect(page.locator('.ticket-body')).toContainText('COP');
@@ -112,13 +126,15 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
       [booking.id]);
     assertBooking(persisted[0], 'CONFIRMADA', option.priceMinor);
 
-    await row.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await row.getByRole('button', { name: 'Cancelar reserva', exact: true }).click();
     const cancellationResponse = page.waitForResponse((response) =>
       response.url().endsWith(`/api/v1/bookings/${booking.id}/cancellation`)
       && response.request().method() === 'POST');
     await row.getByRole('button', { name: 'Sí, cancelar' }).click();
     expect((await (await cancellationResponse).json()).booking.status).toBe('CANCELADA');
     await expect(row).toContainText('Cancelada');
+    await expect(page.getByText('No tienes reservas próximas.', { exact: false })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Anteriores y canceladas' })).toBeVisible();
     await page.reload();
     await expect(page.locator('.booking-row').filter({ hasText: booking.court.name })).toContainText('Cancelada');
     const [cancelled] = await pool.execute('SELECT status, price_amount_minor, price_currency FROM bookings WHERE id = ?',

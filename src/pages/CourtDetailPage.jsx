@@ -33,7 +33,7 @@ export function CourtDetailPage() {
       {court ? <>
         <div className="court-detail-intro">
           <Link className="back-link" to={`/instalaciones/${court.facility.id}`}><ArrowLeft size={17} aria-hidden="true" />{court.facility.name}</Link>
-          <div className="court-detail-heading"><div><span className="sport-pill">{sportLabel(court.sportCode)}</span><h1>{court.name}</h1><p>{court.description}</p><span className="listing-location"><MapPin size={16} aria-hidden="true" />{court.facility.name} · {court.facility.city}</span></div><div className="court-prices"><span>Duraciones y precios</span>{court.prices.map((price) => <div key={price.durationMinutes}><span>{price.durationMinutes} min</span><strong>{formatCOP(price.priceMinor)}</strong></div>)}</div></div>
+          <div className="court-detail-heading"><div><span className="sport-meta">{sportLabel(court.sportCode)}</span><h1>{court.name}</h1><p>{court.description}</p><span className="listing-location"><MapPin size={16} aria-hidden="true" />{court.facility.name} · {court.facility.city}</span></div><div className="court-prices"><span>Duraciones y precios</span>{court.prices.map((price) => <div key={price.durationMinutes}><span>{price.durationMinutes} min</span><strong>{formatCOP(price.priceMinor)}</strong></div>)}</div></div>
         </div>
         <BookingPage court={court} />
       </> : null}

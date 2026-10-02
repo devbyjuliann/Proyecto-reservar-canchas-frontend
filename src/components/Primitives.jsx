@@ -34,6 +34,11 @@ export function StatusDot({ state }) {
   return <span className={`state-label ${inactive ? 'inactive' : 'active'}`}><i />{inactive ? 'Inactivo' : 'Activo'}</span>;
 }
 
+// Presentation only: callers choose the tone without delegating domain rules to the badge.
+export function StatusBadge({ children, tone = 'neutral' }) {
+  return <span className={`status-badge status-badge-${tone}`}>{children}</span>;
+}
+
 export function AddButton({ children, ...props }) {
   return <button className="button button-secondary button-small" type="button" {...props}><Plus size={16} />{children}</button>;
 }

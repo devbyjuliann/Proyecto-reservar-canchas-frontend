@@ -9,7 +9,7 @@ import { createFacilitiesModule, createMySqlFacilitiesAdapter } from '../../../b
 import { createSystemClock } from '../../../backend/src/shared/clock.js';
 import { createMySqlUsersAdapter } from '../../../backend/src/modules/users/index.js';
 
-const BACKEND = 'http://localhost:3107';
+const BACKEND = 'http://localhost:3000';
 
 test('onboarding real: solicitud → aprobación → membresía → Mi negocio', async ({ page }) => {
   test.setTimeout(120_000);
@@ -41,7 +41,7 @@ test('onboarding real: solicitud → aprobación → membresía → Mi negocio',
     expect(registration.status()).toBe(201);
     fixture.applicantId = (await registration.json()).user.id;
     await page.getByLabel('Contraseña', { exact: true }).fill(applicantPassword);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await expect(page).toHaveURL(/\/propietarios$/);
     await expect(page.getByLabel('Nombre comercial')).toBeVisible();
     expect((await page.context().cookies(BACKEND)).some((cookie) => cookie.httpOnly)).toBe(true);
@@ -72,13 +72,14 @@ test('onboarding real: solicitud → aprobación → membresía → Mi negocio',
     await page.getByRole('link', { name: 'Iniciar sesión' }).click();
     await page.getByLabel('Correo').fill(adminEmail);
     await page.getByLabel('Contraseña', { exact: true }).fill(adminPassword);
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await expect(page.getByRole('link', { name: 'Administración' })).toBeVisible();
     expect((await page.context().cookies(BACKEND)).some((cookie) => cookie.httpOnly)).toBe(true);
     await page.getByRole('link', { name: 'Administración' }).click();
     await page.getByRole('link', { name: 'Solicitudes de Propietario' }).click();
     await expect(page.getByRole('heading', { name: 'Solicitudes de Propietario' })).toBeVisible();
     await expect(page.getByRole('status', { name: 'Cargando solicitudes' })).toBeHidden();
+    await expectAdminResponsiveLayout(page);
 
     const pendingItem = page.locator('.application-row').filter({ hasText: businessName });
     for (let pageNumber = 0; pageNumber < 10 && !await pendingItem.isVisible(); pageNumber += 1) {
@@ -108,6 +109,7 @@ test('onboarding real: solicitud → aprobación → membresía → Mi negocio',
 
     await page.goto(`/admin/instalaciones/${assignedId}`);
     await expect(page.getByRole('heading', { name: 'Propietarios de la Instalación' })).toBeVisible();
+    await expectAdminResponsiveLayout(page);
     await page.getByLabel('Propietario aprobado').selectOption(fixture.applicantId);
     const membershipResponse = page.waitForResponse((response) =>
       response.url().endsWith(`/api/v1/admin/facilities/${assignedId}/memberships`)
@@ -125,7 +127,7 @@ test('onboarding real: solicitud → aprobación → membresía → Mi negocio',
     await page.getByLabel('Correo').fill(applicantEmail);
     await page.getByLabel('Contraseña', { exact: true }).fill(applicantPassword);
     const ownerLogin = page.waitForResponse((response) => response.url().endsWith('/api/v1/auth/sessions'));
-    await page.getByRole('button', { name: 'Ingresar', exact: true }).last().click();
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     expect((await (await ownerLogin).json()).user.roles).toContain('PROPIETARIO');
     await expect(page.getByRole('link', { name: 'Mi negocio', exact: true })).toBeVisible();
     const ownedResponse = page.waitForResponse((response) =>
@@ -192,6 +194,14 @@ async function membershipIds(pool, userId) {
     [userId],
   );
   return rows.map(({ facility_id }) => String(facility_id));
+}
+
+async function expectAdminResponsiveLayout(page) {
+  for (const width of [1280, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
 }
 
 async function cleanFixture(pool, fixture) {

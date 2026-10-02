@@ -47,7 +47,10 @@ export function FacilityDetailPage() {
     try {
       const result = await api(withQuery(`/api/v1/facilities/${facilityId}/courts`, { limit: 12, cursor }),
         { signal: controller.signal });
-      setCourts((current) => [...current, ...result.items]);
+      setCourts((current) => {
+        const known = new Set(current.map((court) => court.id));
+        return [...current, ...result.items.filter((court) => !known.has(court.id))];
+      });
       setCursor(result.page.nextCursor);
     } catch (caught) { if (caught.name !== 'AbortError') setError(caught); }
     finally { if (!controller.signal.aborted) setLoadingMore(false); }
@@ -60,10 +63,11 @@ export function FacilityDetailPage() {
       {error ? <ErrorNotice onRetry={() => setRefresh((value) => value + 1)}>{errorCopy(error)}</ErrorNotice> : null}
       {facility ? <>
         <header className="market-detail-hero">
-          <div className="detail-hero-content"><span className="detail-location"><MapPin size={18} aria-hidden="true" />{facility.city}</span><h1>{facility.name}</h1><p>{facility.description}</p><address>{facility.address}</address></div>
+          <div className="detail-hero-content"><span className="detail-location"><MapPin size={18} aria-hidden="true" />{facility.city}</span><h1>{facility.name}</h1><p>{facility.description}</p></div>
           <div className="detail-field" aria-hidden="true"><i /><i /></div>
         </header>
-        <section className="detail-list-section" aria-labelledby="facility-courts-heading"><div className="market-results-heading"><div><h2 id="facility-courts-heading">Canchas de este establecimiento</h2><p>Elige una Cancha para consultar sus Duraciones, precios y turnos.</p></div></div>
+        <div className="facility-address"><MapPin size={18} aria-hidden="true" /><span>Dirección</span><address>{facility.address}</address></div>
+        <section className="detail-list-section" aria-labelledby="facility-courts-heading"><div className="market-results-heading"><div><h2 id="facility-courts-heading">Canchas disponibles</h2><p>Elige una Cancha para consultar sus duraciones, precios y horarios.</p></div></div>
           {!courts.length && !error ? <EmptyState title="Sin Canchas disponibles">Por ahora este establecimiento no muestra Canchas para reservar.</EmptyState> : null}
           {courts.length ? <div className="market-card-grid">{courts.map((court) => <CourtCard key={court.id} court={court} />)}</div> : null}
           {cursor ? <button className="button button-secondary load-more" type="button" disabled={loadingMore} onClick={loadMore}>{loadingMore ? 'Cargando más' : 'Ver más Canchas'}<ArrowRight size={18} aria-hidden="true" /></button> : null}

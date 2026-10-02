@@ -4,8 +4,8 @@ import { Link, useParams } from 'react-router-dom';
 
 import { api, apiItems } from '../../api/client.js';
 import { AdminFacilityMemberships } from '../../components/AdminFacilityMemberships.jsx';
-import { ErrorNotice, LoadingBlock } from '../../components/Feedback.jsx';
-import { ResourceLink, Section } from '../../components/Primitives.jsx';
+import { ButtonPending, ErrorNotice, LoadingBlock } from '../../components/Feedback.jsx';
+import { ResourceLink, Section, StatusBadge } from '../../components/Primitives.jsx';
 import { errorCopy } from '../../lib/format.js';
 
 export function AdminFacilityPage() {
@@ -47,21 +47,21 @@ export function AdminFacilityPage() {
 
   return <div className="page-standard admin-page">
     <Link className="back-link" to="/admin"><ArrowLeft size={17} />Instalaciones</Link>
-    <header className="resource-hero"><div><h1>{facility.name}</h1><p>{facility.timeZone} · ID {facility.id}</p></div>
-      <div className="page-actions">
+    <header className="resource-hero admin-resource-hero"><div><h1>{facility.name}</h1><p>{facility.city || 'Ciudad pendiente'} · {facility.timeZone}</p><div className="admin-resource-states"><StatusBadge tone={facility.state === 'active' ? 'positive' : 'negative'}>{facility.state === 'active' ? 'Activa' : 'Suspendida'}</StatusBadge><StatusBadge tone={facility.publicationState === 'PUBLISHED' ? 'positive' : 'warning'}>{facility.publicationState === 'PUBLISHED' ? 'PUBLICADA' : 'BORRADOR'}</StatusBadge></div></div>
+      <div className="page-actions admin-moderation-actions">
         <button className={facility.publicationState === 'PUBLISHED' ? 'button button-secondary' : 'button button-primary'} type="button" disabled={pending} onClick={() => change('publication', facility.publicationState === 'PUBLISHED' ? 'DELETE' : 'POST', facility.publicationState === 'PUBLISHED' ? 'La Instalación dejó de aparecer en el marketplace.' : 'La Instalación ya aparece en el marketplace.')}>
-          {facility.publicationState === 'PUBLISHED' ? 'Despublicar instalación' : 'Publicar instalación'}
+          <ButtonPending pending={pending} pendingLabel={facility.publicationState === 'PUBLISHED' ? 'Despublicando…' : 'Publicando…'}>{facility.publicationState === 'PUBLISHED' ? 'Despublicar instalación' : 'Publicar instalación'}</ButtonPending>
         </button>
         {facility.state === 'active'
-          ? <button className="button button-danger-subtle" type="button" disabled={pending} onClick={() => change('deactivation', 'POST', 'Instalación suspendida.')}>Suspender instalación</button>
-          : <button className="button button-secondary" type="button" disabled={pending} onClick={() => change('reactivation', 'POST', 'Instalación reactivada.')}>Reactivar instalación</button>}
+          ? <button className="button button-danger-subtle" type="button" disabled={pending} onClick={() => change('deactivation', 'POST', 'Instalación suspendida.')}><ButtonPending pending={pending} pendingLabel="Suspendiendo…">Suspender instalación</ButtonPending></button>
+          : <button className="button button-secondary" type="button" disabled={pending} onClick={() => change('reactivation', 'POST', 'Instalación reactivada.')}><ButtonPending pending={pending} pendingLabel="Reactivando…">Reactivar instalación</ButtonPending></button>}
       </div>
     </header>
     {error ? <ErrorNotice>{errorCopy(error)}</ErrorNotice> : null}
     {message ? <p className="notice notice-success" role="status">{message}</p> : null}
-    <section className="policy-strip" aria-label="Estado y política de reserva"><div><span>Estado</span><strong>{facility.state === 'active' ? 'Activa' : 'Suspendida'}</strong></div><div><span>Publicación</span><strong>{facility.publicationState === 'PUBLISHED' ? 'PUBLICADA' : 'BORRADOR'}</strong></div><div><span>Mínimo</span><strong>{facility.minimumAdvanceMinutes} min</strong></div><div><span>Máximo</span><strong>{facility.maximumAdvanceMinutes} min</strong></div><div><span>Zona horaria</span><strong>{facility.timeZone}</strong></div></section>
+    <section className="policy-strip admin-policy-strip" aria-label="Estado y política de reserva"><div><span>Estado operativo</span><strong>{facility.state === 'active' ? 'Activa' : 'Operación detenida'}</strong></div><div><span>Visibilidad</span><strong>{facility.publicationState === 'PUBLISHED' ? 'Visible en Marketplace' : 'Pendiente de publicación'}</strong></div><div><span>Anticipación</span><strong>{facility.minimumAdvanceMinutes}–{facility.maximumAdvanceMinutes} min</strong></div><div><span>Zona horaria</span><strong>{facility.timeZone}</strong></div></section>
     <Section title="Información del negocio" description="El Propietario prepara y opera esta Instalación."><dl className="definition-grid"><div><dt>Ciudad</dt><dd>{facility.city || 'Pendiente'}</dd></div><div><dt>Dirección</dt><dd>{facility.address || 'Pendiente'}</dd></div><div><dt>Descripción</dt><dd>{facility.description || 'Pendiente'}</dd></div></dl></Section>
-    <Section title="Preparación para publicación" description="Información orientativa. El servidor valida los requisitos definitivos al publicar."><dl className="definition-grid"><div><dt>Ciudad</dt><dd>{facility.city ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Dirección</dt><dd>{facility.address ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Descripción</dt><dd>{facility.description ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Canchas</dt><dd>{courts.length}</dd></div></dl></Section>
+    <Section title="Preparación para publicación" description="Información orientativa. El servidor valida los requisitos definitivos al publicar."><dl className="definition-grid admin-readiness-grid"><div><dt>Ciudad</dt><dd>{facility.city ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Dirección</dt><dd>{facility.address ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Descripción</dt><dd>{facility.description ? 'Configurada' : 'Pendiente'}</dd></div><div><dt>Canchas para revisión</dt><dd>{courts.length}</dd></div></dl></Section>
     <Section title="Canchas" description="Configuración del negocio, solo lectura para Administración."><div className="resource-list">{courts.map((court) => <ResourceLink key={court.id} to={`/admin/canchas/${court.id}`} title={court.name} meta={`${court.allowedDurationsMinutes.join(', ')} min · ${court.sportCode || 'Deporte pendiente'}`} state={court.state} />)}</div></Section>
     <AdminFacilityMemberships facilityId={facilityId} />
   </div>;

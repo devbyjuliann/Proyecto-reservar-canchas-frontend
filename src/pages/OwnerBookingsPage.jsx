@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { api, apiItems, withQuery } from '../api/client.js';
 import { EmptyState, LoadingBlock } from '../components/Feedback.jsx';
 import { isOwnerAccessLost, OwnerAccessNotice } from '../components/OwnerAccessNotice.jsx';
+import { StatusBadge } from '../components/Primitives.jsx';
 import { formatCOP, statusLabel } from '../lib/format.js';
 
 const PATH = '/api/v1/owner/bookings';
@@ -146,7 +147,7 @@ export function OwnerBookingsPage() {
 
   return <div className="owner-console owner-bookings-page">
     <Link className="back-link" to="/owner"><ArrowLeft size={17} aria-hidden="true" />Volver a Mi negocio</Link>
-    <header className="owner-console-hero"><div><span className="owner-console-label">Mi negocio / Reservas</span><h1>Reservas recibidas</h1><p>Turnos de las Canchas de tus Instalaciones. Consulta el horario y el precio acordado al confirmar cada Reserva.</p></div><CalendarDays size={56} strokeWidth={1.3} aria-hidden="true" /></header>
+    <header className="owner-console-hero"><div><span className="owner-console-label">Mi negocio / Reservas</span><h1>Reservas recibidas</h1><p>Turnos de las Canchas de tus Instalaciones. Consulta el horario y el precio acordado al confirmar cada Reserva.</p></div></header>
     <section className="owner-bookings-filters" aria-label="Filtrar Reservas recibidas">
       <div className="owner-bookings-filter-heading"><h2>Filtrar Reservas</h2><p>Los filtros por fecha usan días UTC. El horario de cada turno se muestra en la hora local de su Instalación.</p></div>
       <div className="owner-bookings-filter-grid">
@@ -173,6 +174,6 @@ function OwnerBookingRow({ booking }) {
   return <article className="owner-booking-row">
     <div className="owner-booking-when"><time dateTime={booking.startAt}>{dateAt(booking.startAt, booking.timeZone)}</time><strong>{timeAt(booking.startAt, booking.timeZone)} – {timeAt(booking.endAt, booking.timeZone)}</strong><small>{booking.timeZone}</small></div>
     <div className="owner-booking-where"><h3>{booking.court.name}</h3><p>{booking.facility.name}</p><span><Clock3 size={15} aria-hidden="true" />{booking.durationMinutes} min · Reserva #{booking.id}</span>{booking.user?.name ? <p className="owner-booking-customer">Cliente: {booking.user.name}</p> : null}</div>
-    <div className="owner-booking-outcome"><span className={`owner-state owner-booking-status status-${booking.status.toLowerCase()}`}>{statusLabel(booking.status)}</span><strong>{booking.priceMinor == null ? 'Precio no disponible' : formatCOP(booking.priceMinor)}</strong></div>
+    <div className="owner-booking-outcome"><StatusBadge tone={booking.status === 'CONFIRMADA' ? 'positive' : booking.status === 'CANCELADA' ? 'negative' : 'neutral'}>{statusLabel(booking.status)}</StatusBadge><strong>{booking.priceMinor == null ? 'Precio no disponible' : formatCOP(booking.priceMinor)}</strong></div>
   </article>;
 }

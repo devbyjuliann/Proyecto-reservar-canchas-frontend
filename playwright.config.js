@@ -21,7 +21,10 @@ export default defineConfig({
     {
       command: 'node --env-file=.env.test.local src/server.js',
       cwd: backend,
-      env: { PORT: '3000', FRONTEND_ORIGIN: 'http://localhost:5177' },
+      env: {
+        PORT: '3000', FRONTEND_ORIGIN: 'http://localhost:5177',
+        AUTH_TEST_REGISTRATION_LIMIT: '100', AUTH_TEST_LOGIN_LIMIT: '100',
+      },
       url: 'http://127.0.0.1:3000/health',
       reuseExistingServer: false,
       timeout: 30_000,

@@ -24,6 +24,14 @@ test('renders an API sport code without changing the search identifier', () => {
   assert.equal(sportLabel(null), 'Deporte no indicado');
 });
 
+test('maps customer-facing booking conflicts without exposing API codes', () => {
+  assert.match(errorCopy({ code: 'booking_price_changed' }), /precio de este turno cambió/i);
+  assert.match(errorCopy({ code: 'booking_conflict' }), /dejar de estar disponible/i);
+  assert.match(errorCopy({ code: 'option_not_available' }), /Elige otro turno/i);
+  assert.match(errorCopy({ code: 'booking_already_started' }), /no se puede cancelar/i);
+  assert.doesNotMatch(errorCopy({ code: 'booking_conflict' }), /booking_conflict|HTTP 409/i);
+});
+
 test('explains a rejected publication without inventing publication rules', () => {
   assert.match(errorCopy({ code: 'facility_not_publishable' }), /datos públicos/i);
   assert.match(errorCopy({ code: 'facility_not_publishable' }), /precio COP/i);
