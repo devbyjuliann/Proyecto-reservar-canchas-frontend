@@ -5,6 +5,7 @@ import { createMySqlPool } from '../../../backend/src/database/pool.js';
 import { createAuthModule, createMySqlAuthAdapter } from '../../../backend/src/modules/auth/index.js';
 import { createSystemClock } from '../../../backend/src/shared/clock.js';
 import { todayInTimeZone } from '../../src/lib/format.js';
+import { approvePendingBooking } from './helpers/payments.js';
 
 const API = 'http://localhost:3000';
 const unique = randomUUID().slice(0, 8);
@@ -157,10 +158,14 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await page.getByRole('button', { name: 'Ver turnos' }).click();
     await page.locator('.slot-option').filter({ hasText: '16:00' }).filter({ hasText: '60 min' }).click();
     const bookingResponse = page.waitForResponse((r) => r.url().endsWith('/api/v1/bookings') && r.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Confirmar reserva' }).click();
+    await page.getByRole('button', { name: 'Continuar al anticipo' }).click();
     const confirmed = await bookingResponse;
     expect(confirmed.status()).toBe(201);
-    ids.booking = (await confirmed.json()).booking.id;
+    const buyerBooking = await confirmed.json();
+    ids.booking = buyerBooking.booking.id;
+    expect(buyerBooking.booking.status).toBe('PENDIENTE_PAGO');
+    await expect(page.getByRole('heading', { name: 'Anticipo pendiente' })).toBeVisible();
+    expect((await approvePendingBooking(page.context().request, buyerBooking)).booking.status).toBe('CONFIRMADA');
     await page.getByRole('link', { name: 'Mis reservas', exact: true }).click();
     await expect(page.locator('.booking-row').filter({ hasText: `Cancha ${unique}` })).toContainText('Confirmada');
     await logout(page);
@@ -203,10 +208,13 @@ test('solicitud → aprobación → negocio Owner → publicación Admin → Res
     await page.getByRole('button', { name: 'Ver turnos' }).click();
     await page.locator('.slot-option').filter({ hasText: '17:30' }).filter({ hasText: '60 min' }).click();
     const ownerAsCustomer = page.waitForResponse((r) => r.url().endsWith('/api/v1/bookings') && r.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Confirmar reserva' }).click();
+    await page.getByRole('button', { name: 'Continuar al anticipo' }).click();
     const ownConfirmation = await ownerAsCustomer;
     expect(ownConfirmation.status()).toBe(201);
-    ids.ownerBooking = (await ownConfirmation.json()).booking.id;
+    const ownerBooking = await ownConfirmation.json();
+    ids.ownerBooking = ownerBooking.booking.id;
+    expect(ownerBooking.booking.status).toBe('PENDIENTE_PAGO');
+    expect((await approvePendingBooking(page.context().request, ownerBooking)).booking.status).toBe('CONFIRMADA');
     await page.getByRole('link', { name: 'Mis reservas', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Mis reservas' })).toBeVisible();
     const ownRow = page.locator('.booking-row').filter({ hasText: `Cancha ${unique}` });
@@ -278,11 +286,19 @@ async function clean(pool, ids) {
   if (ids.owner) {
     await pool.execute('DELETE FROM idempotency_records WHERE user_id = ?', [ids.owner]);
     await pool.execute('DELETE FROM operational_conflicts WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [ids.owner]);
+    await pool.execute('DELETE FROM booking_changes WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ? AND court_id = ?)', [ids.owner, ids.court ?? '0']);
+    await pool.execute('DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ? AND court_id = ?)', [ids.owner, ids.court ?? '0']);
+    await pool.execute('DELETE FROM customer_credit_ledger WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ? AND court_id = ?)', [ids.owner, ids.court ?? '0']);
+    await pool.execute('DELETE FROM customer_credit_balances WHERE facility_id = ? AND user_id = ?', [ids.facility ?? '0', ids.owner]);
     await pool.execute('DELETE FROM bookings WHERE user_id = ? AND court_id = ?', [ids.owner, ids.court ?? '0']);
   }
   if (ids.buyer) {
     await pool.execute('DELETE FROM idempotency_records WHERE user_id = ?', [ids.buyer]);
     await pool.execute('DELETE FROM operational_conflicts WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [ids.buyer]);
+    await pool.execute('DELETE FROM booking_changes WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [ids.buyer]);
+    await pool.execute('DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [ids.buyer]);
+    await pool.execute('DELETE FROM customer_credit_ledger WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [ids.buyer]);
+    await pool.execute('DELETE FROM customer_credit_balances WHERE facility_id = ? AND user_id = ?', [ids.facility ?? '0', ids.buyer]);
     await pool.execute('DELETE FROM bookings WHERE user_id = ?', [ids.buyer]);
   }
   if (ids.court) {

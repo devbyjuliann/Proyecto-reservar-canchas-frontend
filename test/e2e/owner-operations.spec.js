@@ -146,8 +146,9 @@ test('owner real: configuración, horario y precio hasta el marketplace público
         const courtId = fixture.courtIds[0];
         const ownerPath = `${BACKEND}/api/v1/owner/courts/${courtId}`;
         if (modified.configuration) {
+          const { cancellationMinMinutes, depositPercentage, ...configuration } = original.configuration;
           const response = await ownerAPI.put(`${ownerPath}/booking-configuration`, {
-            data: original.configuration, headers: { Origin: ORIGIN },
+            data: configuration, headers: { Origin: ORIGIN },
           });
           expect(response.status()).toBe(200);
         }

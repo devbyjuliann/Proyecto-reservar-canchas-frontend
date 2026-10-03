@@ -22,6 +22,7 @@ import { OwnerCourtPage } from './pages/OwnerCourtPage.jsx';
 import { OwnerBookingsPage } from './pages/OwnerBookingsPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
 import { MyBookingsPage } from './pages/MyBookingsPage.jsx';
+import { PaymentReturnPage } from './pages/PaymentReturnPage.jsx';
 
 export function App() {
   return (
@@ -36,6 +37,7 @@ export function App() {
         <Route path="/canchas/:courtId" element={<CourtDetailPage />} />
         <Route path="/propietarios" element={<RequireAuth><OwnerIntroPage /></RequireAuth>} />
         <Route path="/reservas" element={<RequireAuth><MyBookingsPage /></RequireAuth>} />
+        <Route path="/reservas/pago" element={<RequireAuth><PaymentReturnPage /></RequireAuth>} />
         <Route path="/perfil" element={<RequireAuth><ProfilePage /></RequireAuth>} />
         <Route path="/owner" element={<RequireOwner><OwnerDashboardPage /></RequireOwner>} />
         <Route path="/owner/reservas" element={<RequireOwner><OwnerBookingsPage /></RequireOwner>} />

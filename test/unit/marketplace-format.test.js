@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { errorCopy, formatCOP, priceMinorFromCOP, sportLabel } from '../../src/lib/format.js';
+import { errorCopy, formatCancellationWindow, formatCOP, formatPaymentCountdown, priceMinorFromCOP, sportLabel } from '../../src/lib/format.js';
+
+test('explains cancellation policy before confirmation in human units', () => {
+  assert.equal(formatCancellationWindow(120), '2 horas antes del inicio');
+  assert.equal(formatCancellationWindow(30), '30 minutos antes del inicio');
+  assert.equal(formatCancellationWindow(0), 'hasta el inicio');
+  assert.match(errorCopy({ code: 'booking_cancellation_window_closed' }), /plazo de cancelación/i);
+});
 
 test('formats the backend amount in COP and does not invent legacy prices', () => {
   assert.match(formatCOP(9000000), /COP/);
@@ -30,6 +37,13 @@ test('maps customer-facing booking conflicts without exposing API codes', () => 
   assert.match(errorCopy({ code: 'option_not_available' }), /Elige otro turno/i);
   assert.match(errorCopy({ code: 'booking_already_started' }), /no se puede cancelar/i);
   assert.doesNotMatch(errorCopy({ code: 'booking_conflict' }), /booking_conflict|HTTP 409/i);
+});
+
+test('derives the payment countdown from the server expiration instant', () => {
+  const now = Date.parse('2026-10-03T12:00:00.000Z');
+  assert.equal(formatPaymentCountdown('2026-10-03T12:09:42.000Z', now), '09:42');
+  assert.equal(formatPaymentCountdown('2026-10-03T11:59:59.000Z', now), '00:00');
+  assert.match(errorCopy({ code: 'payment_expired' }), /tiempo para completar/i);
 });
 
 test('explains a rejected publication without inventing publication rules', () => {

@@ -16,6 +16,7 @@ import { createPublicCatalogModule, createMySqlPublicCatalogAdapter } from '../.
 import { createSystemClock } from '../../../backend/src/shared/clock.js';
 
 import { todayInTimeZone } from '../../src/lib/format.js';
+import { approvePendingBooking } from './helpers/payments.js';
 
 const BACKEND = 'http://localhost:3000';
 const PRICE_MINOR = 9000000;
@@ -95,7 +96,7 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
       expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth + 1);
     }
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.getByRole('button', { name: 'Iniciar sesión para confirmar' }).click();
+    await page.getByRole('button', { name: 'Iniciar sesión para continuar' }).click();
     await expect(page).toHaveURL(/\/acceso$/);
     await expect(page.getByText('Inicia sesión para continuar con tu reserva.', { exact: false })).toBeVisible();
     await page.getByRole('tab', { name: 'Crear cuenta' }).click();
@@ -111,13 +112,13 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
     await page.getByLabel('Contraseña', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/canchas/${court.id}$`));
-    await expect(page.getByRole('button', { name: 'Confirmar reserva' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Continuar al anticipo' })).toBeVisible();
     await expect(page.locator('.ticket-body')).toContainText('COP');
     expect((await page.context().cookies(BACKEND)).some((cookie) => cookie.httpOnly)).toBe(true);
 
     const confirmationResponse = page.waitForResponse((response) =>
       response.url().endsWith('/api/v1/bookings') && response.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Confirmar reserva' }).click();
+    await page.getByRole('button', { name: 'Continuar al anticipo' }).click();
     const confirmation = await confirmationResponse;
     expect(confirmation.status()).toBe(201);
     expect(confirmation.request().postDataJSON()).toMatchObject({
@@ -125,10 +126,13 @@ test('marketplace real: explorar → reservar con precio → cancelar', async ({
       expectedPriceMinor: option.priceMinor, currency: 'COP',
     });
     expect(confirmation.request().headers()['x-user-id']).toBeUndefined();
-    const { booking } = await confirmation.json();
+    const created = await confirmation.json();
+    const { booking } = created;
     expect(booking.priceMinor).toBe(option.priceMinor);
     expect(booking.currency).toBe('COP');
-    await expect(page.getByRole('heading', { name: 'Reserva confirmada' })).toBeVisible();
+    expect(booking.status).toBe('PENDIENTE_PAGO');
+    await expect(page.getByRole('heading', { name: 'Anticipo pendiente' })).toBeVisible();
+    expect((await approvePendingBooking(page.context().request, created)).booking.status).toBe('CONFIRMADA');
     await expect.poll(async () => (await bookingEmails(email, 'booking-confirmation')).length).toBe(1);
     const [confirmationMail] = await bookingEmails(email, 'booking-confirmation');
     expect(confirmationMail.subject).toBe('Reserva confirmada - Reserva Canchas');
@@ -236,7 +240,7 @@ test('Continuar con Google conserva el turno elegido hasta confirmar la Reserva'
     await page.getByRole('button', { name: 'Ver turnos' }).click();
     await page.locator('.slot-option').filter({ hasText: option.startTime.slice(0, 5) })
       .filter({ hasText: `${option.durationMinutes} min` }).first().click();
-    await page.getByRole('button', { name: 'Iniciar sesión para confirmar' }).click();
+    await page.getByRole('button', { name: 'Iniciar sesión para continuar' }).click();
     await expect(page).toHaveURL(/\/acceso$/);
     await expect(page.getByText('Inicia sesión para continuar con tu reserva.', { exact: false })).toBeVisible();
     const loginResponse = page.waitForResponse((response) => response.url().endsWith('/api/v1/auth/google'));
@@ -246,16 +250,18 @@ test('Continuar con Google conserva el turno elegido hasta confirmar la Reserva'
     buyerId = (await login.json()).user.id;
     expect((await login.json()).user.roles).toEqual(['USUARIO']);
     await expect(page).toHaveURL(new RegExp(`/canchas/${court.id}$`));
-    await expect(page.getByRole('button', { name: 'Confirmar reserva' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Continuar al anticipo' })).toBeVisible();
     await expect(page.locator('.ticket-body')).toContainText(option.startTime.slice(0, 5));
     const confirmed = page.waitForResponse((response) => response.url().endsWith('/api/v1/bookings')
       && response.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Confirmar reserva' }).click();
+    await page.getByRole('button', { name: 'Continuar al anticipo' }).click();
     const result = await confirmed;
     expect(result.status()).toBe(201);
-    const { booking } = await result.json();
-    expect(booking).toMatchObject({ court: { id: court.id }, priceMinor: option.priceMinor, status: 'CONFIRMADA' });
-    await expect(page.getByRole('heading', { name: 'Reserva confirmada' })).toBeVisible();
+    const created = await result.json();
+    const { booking } = created;
+    expect(booking).toMatchObject({ court: { id: court.id }, priceMinor: option.priceMinor, status: 'PENDIENTE_PAGO' });
+    await expect(page.getByRole('heading', { name: 'Anticipo pendiente' })).toBeVisible();
+    expect((await approvePendingBooking(page.context().request, created)).booking.status).toBe('CONFIRMADA');
     const [identities] = await pool.execute('SELECT provider FROM user_external_identities WHERE user_id = ?', [buyerId]);
     const [passwords] = await pool.execute('SELECT user_id FROM user_credentials WHERE user_id = ?', [buyerId]);
     expect(identities.map((identity) => identity.provider)).toEqual(['GOOGLE']);
@@ -364,6 +370,10 @@ async function removeBuyer(pool, userId) {
   await pool.execute('DELETE FROM user_external_identities WHERE user_id = ?', [userId]);
   await pool.execute('DELETE FROM idempotency_records WHERE user_id = ?', [userId]);
   await pool.execute('DELETE FROM operational_conflicts WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [userId]);
+  await pool.execute('DELETE FROM booking_changes WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [userId]);
+  await pool.execute('DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [userId]);
+  await pool.execute('DELETE FROM customer_credit_ledger WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)', [userId]);
+  await pool.execute('DELETE FROM customer_credit_balances WHERE user_id = ?', [userId]);
   await pool.execute('DELETE FROM bookings WHERE user_id = ?', [userId]);
   await pool.execute('DELETE FROM sessions WHERE user_id = ?', [userId]);
   await pool.execute('DELETE FROM user_credentials WHERE user_id = ?', [userId]);

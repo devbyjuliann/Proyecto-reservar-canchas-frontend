@@ -14,6 +14,7 @@ import { createMySqlPool } from '../../../backend/src/database/pool.js';
 import { createSystemClock } from '../../../backend/src/shared/clock.js';
 
 import { todayInTimeZone } from '../../src/lib/format.js';
+import { approvePendingBooking } from './helpers/payments.js';
 
 const API = 'http://localhost:3000';
 const ORIGIN = 'http://localhost:5177';
@@ -36,12 +37,17 @@ test('dos clientes ven el mismo slot y el segundo recibe disponibilidad actualiz
     expect(optionA.startTime).toBe(optionB.startTime);
 
     const confirmed = pageA.waitForResponse(bookingResponse);
-    await pageA.getByRole('button', { name: 'Confirmar reserva' }).click();
-    expect((await confirmed).status()).toBe(201);
-    await expect(pageA.getByRole('heading', { name: 'Reserva confirmada' })).toBeVisible();
+    await pageA.getByRole('button', { name: 'Continuar al anticipo' }).click();
+    const created = await confirmed;
+    expect(created.status()).toBe(201);
+    const pending = await created.json();
+    expect(pending.booking.status).toBe('PENDIENTE_PAGO');
+    await expect(pageA.getByRole('heading', { name: 'Anticipo pendiente' })).toBeVisible();
+    const approved = await approvePendingBooking(buyerA.request, pending);
+    expect(approved.booking.status).toBe('CONFIRMADA');
 
     const rejected = pageB.waitForResponse(bookingResponse);
-    await pageB.getByRole('button', { name: 'Confirmar reserva' }).click();
+    await pageB.getByRole('button', { name: 'Continuar al anticipo' }).click();
     const response = await rejected;
     expect(response.status()).toBe(409);
     expect(['booking_conflict', 'option_not_available']).toContain((await response.json()).error.code);
@@ -83,7 +89,7 @@ test('un cambio de precio obliga a volver a seleccionar antes de confirmar', asy
     expect(priceResponse.status()).toBe(200);
 
     const rejected = buyerPage.waitForResponse(bookingResponse);
-    await buyerPage.getByRole('button', { name: 'Confirmar reserva' }).click();
+    await buyerPage.getByRole('button', { name: 'Continuar al anticipo' }).click();
     const response = await rejected;
     expect(response.status()).toBe(409);
     expect((await response.json()).error.code).toBe('booking_price_changed');
@@ -95,12 +101,15 @@ test('un cambio de precio obliga a volver a seleccionar antes de confirmar', asy
     await buyerPage.getByRole('button', { name: new RegExp(`${original.startTime.slice(0, 5)}.*60 min`) }).click();
     await expect(buyerPage.getByLabel('Resumen de la reserva')).toContainText('COP 65.000');
     const confirmed = buyerPage.waitForResponse(bookingResponse);
-    await buyerPage.getByRole('button', { name: 'Confirmar reserva' }).click();
+    await buyerPage.getByRole('button', { name: 'Continuar al anticipo' }).click();
     const booked = await confirmed;
     expect(booked.status()).toBe(201);
-    const { booking } = await booked.json();
+    const created = await booked.json();
+    const { booking } = created;
     expect(booking.priceMinor).toBe(UPDATED_PRICE);
     expect(booking.currency).toBe('COP');
+    expect(booking.status).toBe('PENDIENTE_PAGO');
+    expect((await approvePendingBooking(buyer.request, created)).booking.status).toBe('CONFIRMADA');
   } finally {
     await buyer.close();
     await owner.close();
@@ -186,6 +195,10 @@ async function removeFixture(pool, fixture) {
   if (!fixture) return;
   await pool.execute('DELETE FROM idempotency_records WHERE user_id IN (?, ?)', fixture.buyerIds);
   await pool.execute('DELETE FROM operational_conflicts WHERE booking_id IN (SELECT id FROM bookings WHERE court_id = ?)', [fixture.courtId]);
+  await pool.execute('DELETE FROM booking_changes WHERE booking_id IN (SELECT id FROM bookings WHERE court_id = ?)', [fixture.courtId]);
+  await pool.execute('DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE court_id = ?)', [fixture.courtId]);
+  await pool.execute('DELETE FROM customer_credit_ledger WHERE booking_id IN (SELECT id FROM bookings WHERE court_id = ?)', [fixture.courtId]);
+  await pool.execute('DELETE FROM customer_credit_balances WHERE facility_id = ?', [fixture.facilityId]);
   await pool.execute('DELETE FROM bookings WHERE court_id = ?', [fixture.courtId]);
   await pool.execute('DELETE FROM operational_changes WHERE court_id = ?', [fixture.courtId]);
   await pool.execute('DELETE FROM court_weekly_periods WHERE court_id = ?', [fixture.courtId]);

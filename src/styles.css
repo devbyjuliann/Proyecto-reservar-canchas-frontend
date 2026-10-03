@@ -205,6 +205,10 @@ a { color: inherit; }
 .ticket-body dl div, .conflict-detail dl div { display: flex; justify-content: space-between; gap: 1rem; padding: .72rem 0; border-top: 1px solid #bdc7c0; }
 .ticket-body dt, .conflict-detail dt { color: var(--muted); font-size: .78rem; }.ticket-body dd, .conflict-detail dd { margin: 0; text-align: right; font-size: .8rem; font-weight: 650; }
 .ticket-note { margin: 1.2rem 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+.checkout-credit { margin-top: 1rem; }
+.checkout-credit small { display: block; margin-top: .35rem; color: var(--muted); font-size: .75rem; line-height: 1.45; }
+.checkout-pending { display: flex; flex-direction: column; min-height: 100%; }
+.checkout-countdown { display: inline-block; width: fit-content; margin: .65rem 0 1rem; padding: .45rem .65rem; border-radius: 6px; background: var(--rubber); color: var(--ball); font-variant-numeric: tabular-nums; font-size: 1.45rem; letter-spacing: .06em; }
 .booking-ticket > .button { margin-top: auto; }
 .ticket-empty { display: grid; place-items: center; align-content: center; flex: 1; padding: 2rem 1rem; text-align: center; color: #66746f; }
 .ticket-empty strong { margin-top: .7rem; color: var(--rubber); }.ticket-empty p { max-width: 26ch; margin: .4rem 0; font-size: .85rem; line-height: 1.45; }
@@ -230,7 +234,7 @@ a { color: inherit; }
 .booking-place { min-width: 0; }.booking-place h2 { margin: .2rem 0 0; font-size: 1.18rem; line-height: 1.25; overflow-wrap: anywhere; }.booking-place .booking-facility { display: flex; align-items: center; gap: .35rem; margin: 0; color: var(--court-deep); font-size: .9rem; font-weight: 650; overflow-wrap: anywhere; }
 .booking-outcome { display: grid; justify-items: start; gap: .55rem; min-width: 0; }
 .booking-outcome .booking-price { color: var(--rubber); font-size: 1rem; line-height: 1.2; font-weight: 730; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.booking-actions { display: flex; justify-content: flex-end; }
+.booking-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-xs); }
 .booking-actions.is-confirming { grid-column: 2 / -1; grid-row: 2; justify-content: stretch; }
 .booking-confirmation { width: 100%; padding: var(--space-md); background: #f9ebe8; border-radius: var(--radius-control); }
 .booking-confirmation strong { color: #762727; font-size: .9rem; }
@@ -238,6 +242,14 @@ a { color: inherit; }
 .booking-confirmation > div { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
 .inline-confirm { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .45rem; max-width: 300px; }.inline-confirm strong, .inline-confirm span { flex-basis: 100%; text-align: right; font-size: .77rem; }.inline-confirm strong { font-size: .82rem; }
 .row-error { grid-column: 2 / -1; display: flex; gap: .4rem; color: #842f2f; font-size: .85rem; }
+.booking-row > .notice, .booking-row > .booking-reschedule, .booking-row > .form-stack,
+.booking-row > .booking-change-history { grid-column: 1 / -1; }
+.booking-reschedule { display: grid; gap: var(--space-sm); padding: var(--space-md); background: #f8f9f4; border-radius: var(--radius-control); }
+.booking-reschedule h3, .booking-reschedule p { margin: 0; }
+.booking-reschedule [role="group"] { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.booking-reschedule [aria-pressed="true"] { background: var(--court-deep); color: var(--white); }
+.booking-change-history { margin: 0; padding: var(--space-sm) var(--space-lg); color: #42564b; line-height: 1.6; }
+.owner-booking-row > .booking-actions { grid-column: 1 / -1; padding: var(--space-sm); }
 .load-more { display: flex; margin: 1.2rem auto 0; }
 
 .admin-page { --admin-rule: #c5cdc6; }

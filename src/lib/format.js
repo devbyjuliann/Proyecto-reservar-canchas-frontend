@@ -62,9 +62,27 @@ export function formatTime(value) {
   return value?.slice(0, 5) ?? '';
 }
 
+export function formatCancellationWindow(minutes) {
+  if (minutes === 0) return 'hasta el inicio';
+  if (minutes % 60 === 0) {
+    const hours = minutes / 60;
+    return `${hours} ${hours === 1 ? 'hora' : 'horas'} antes del inicio`;
+  }
+  return `${minutes} ${minutes === 1 ? 'minuto' : 'minutos'} antes del inicio`;
+}
+
+export function formatPaymentCountdown(expiresAt, now = Date.now()) {
+  if (!expiresAt) return null;
+  const remainingSeconds = Math.max(0, Math.ceil((new Date(expiresAt).getTime() - now) / 1000));
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 export function statusLabel(status) {
   return ({
     CONFIRMADA: 'Confirmada',
+    PENDIENTE_PAGO: 'Pendiente de anticipo',
     CANCELADA: 'Cancelada',
     COMPLETADA: 'Completada',
   })[status] ?? status;
@@ -92,6 +110,12 @@ export function errorCopy(error) {
     booking_price_changed: 'El precio de este turno cambió desde que lo seleccionaste. Revisa la nueva selección.',
     invalid_booking_option: 'Ese turno ya no cumple la configuración vigente.',
     booking_already_started: 'La reserva ya comenzó y no se puede cancelar.',
+    booking_not_started: 'Solo puedes marcar una ausencia después del inicio del turno.',
+    booking_cancellation_window_closed: 'El plazo de cancelación de esta reserva ya terminó.',
+    booking_exception_pending: 'Ya existe una solicitud de excepción pendiente para esta reserva.',
+    payment_expired: 'El tiempo para completar el anticipo terminó. Elige el turno nuevamente.',
+    invalid_payment_amount: 'El importe acreditado no coincide con el anticipo pendiente.',
+    payment_reference_reused: 'Este pago ya fue usado en otra reserva.',
     invalid_booking_state: 'Esta reserva ya no se puede cancelar.',
     email_already_registered: 'Ese correo ya está registrado. Puedes iniciar sesión.',
     resource_inactive: 'El recurso está inactivo y no admite cambios.',

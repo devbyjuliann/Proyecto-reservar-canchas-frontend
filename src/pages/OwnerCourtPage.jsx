@@ -39,6 +39,8 @@ export function OwnerCourtPage() {
   const [message, setMessage] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [sectionRefresh, setSectionRefresh] = useState(0);
+  const [policyMinutes, setPolicyMinutes] = useState(120);
+  const [depositPercentage, setDepositPercentage] = useState(30);
   const courtController = useRef(null);
   const sectionController = useRef(null);
   const moreController = useRef(null);
@@ -102,6 +104,10 @@ export function OwnerCourtPage() {
       .then((result) => {
         if (!controller.signal.aborted && !accessLost.current) {
           setData(section === 'schedule' ? result.weeklySchedule : result);
+          if (section === 'configuration') {
+            setPolicyMinutes(result.cancellationMinMinutes ?? 120);
+            setDepositPercentage(result.depositPercentage ?? 30);
+          }
         }
       })
       .catch((caught) => { if (caught.name !== 'AbortError') handleFailure(caught, true); })
@@ -163,6 +169,8 @@ export function OwnerCourtPage() {
           deactivate={() => mutate(`${base}/deactivation`, 'POST', undefined, 'Cancha desactivada. No se ofrecen nuevos turnos.')} /> : null}
         {section === 'configuration' && data ? <ConfigurationSection key={`${courtId}-${sectionRefresh}`} courtId={courtId} value={data} pending={pending} disabled={court.state !== 'active'}
           save={(values) => mutate(`${base}/booking-configuration`, 'PUT', values, 'Configuración de Reserva actualizada.')} /> : null}
+         {section === 'configuration' && data ? <form className="form-stack" onSubmit={(event) => { event.preventDefault(); mutate(`${base}/cancellation-policy`, 'PUT', { cancellationMinMinutes: policyMinutes }, 'Política de cancelación actualizada para nuevas Reservas.'); }}><h2>Cancelación y cambios</h2><p>El plazo se guarda en cada Reserva al confirmar. Cambiarlo no altera Reservas existentes.</p><label className="field"><span>Minutos mínimos antes del inicio</span><input type="number" min="0" max="4294967295" step="1" required value={policyMinutes} onChange={(event) => setPolicyMinutes(Number(event.target.value))} disabled={pending || court.state !== 'active'} /></label><button className="button button-secondary" disabled={pending || court.state !== 'active'}>Guardar política</button></form> : null}
+         {section === 'configuration' && data ? <form className="form-stack" onSubmit={(event) => { event.preventDefault(); mutate(`${base}/deposit-policy`, 'PUT', { depositPercentage }, 'Anticipo actualizado para nuevas Reservas.'); }}><h2>Anticipo</h2><p>El porcentaje se guarda en cada Reserva al crear el checkout. Las Reservas existentes conservan su valor.</p><label className="field"><span>Porcentaje del anticipo</span><input type="number" min="1" max="100" step="1" required value={depositPercentage} onChange={(event) => setDepositPercentage(Number(event.target.value))} disabled={pending || court.state !== 'active'} /><small>100% exige pagar el valor completo antes de confirmar.</small></label><button className="button button-secondary" disabled={pending || court.state !== 'active'}>Guardar anticipo</button></form> : null}
         {section === 'schedule' && data ? <ScheduleSection key={`${courtId}-${sectionRefresh}`} value={data} pending={pending} disabled={court.state !== 'active'}
           save={(values) => mutate(`${base}/weekly-schedule`, 'PUT', values, 'Horario semanal actualizado.')} /> : null}
         {section === 'exceptions' && data ? <ExceptionsSection items={data.items} cursor={data.page?.nextCursor} loadingMore={loadingMore} loadMore={loadMore} timeZone={facility.timeZone} pending={pending} disabled={court.state !== 'active'}
