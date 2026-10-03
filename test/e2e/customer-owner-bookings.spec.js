@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 import { expect, test } from '@playwright/test';
 
@@ -17,6 +19,13 @@ import { formatCOP, todayInTimeZone } from '../../src/lib/format.js';
 
 const BACKEND = 'http://localhost:3000';
 const PRICE_MINOR = 9000000;
+const OUTBOX = fileURLToPath(new URL('../../../backend/.password-reset-outbox.jsonl', import.meta.url));
+
+async function bookingEmails(email, type) {
+  const content = await readFile(OUTBOX, 'utf8').catch((error) => error.code === 'ENOENT' ? '' : Promise.reject(error));
+  return content.split('\n').filter(Boolean).map((line) => JSON.parse(line))
+    .filter((message) => message.email === email && message.type === type);
+}
 
 test('cliente reserva y propietario ve únicamente su turno recibido', async ({ page }) => {
   test.setTimeout(150_000);
@@ -75,6 +84,14 @@ test('cliente reserva y propietario ve únicamente su turno recibido', async ({ 
     fixture.bookingId = booking.id;
     expect(booking).toMatchObject({ facility: { id: setup.facility.id, name: setup.facility.name }, court: { id: setup.court.id, name: setup.court.name }, priceMinor: PRICE_MINOR, currency: 'COP', status: 'CONFIRMADA' });
     await expect(page.getByRole('heading', { name: 'Reserva confirmada' })).toBeVisible();
+    await expect.poll(async () => (await bookingEmails(setup.buyer.email, 'booking-confirmation')).length).toBe(1);
+    await expect.poll(async () => (await bookingEmails(setup.owner.email, 'owner-booking-confirmation')).length).toBe(1);
+    const [ownerConfirmation] = await bookingEmails(setup.owner.email, 'owner-booking-confirmation');
+    expect(ownerConfirmation.text).toContain(setup.facility.name);
+    expect(ownerConfirmation.text).toContain(setup.court.name);
+    expect(ownerConfirmation.text).toContain('Cliente E2E');
+    expect(ownerConfirmation.text).toContain('$90.000 COP');
+    expect(ownerConfirmation.text).toContain('/owner/bookings');
     await page.getByRole('link', { name: 'Mis reservas', exact: true }).click();
     const customerRow = page.locator('.booking-row').filter({ hasText: setup.court.name });
     await expect(customerRow).toContainText('Confirmada');
@@ -126,6 +143,11 @@ test('cliente reserva y propietario ve únicamente su turno recibido', async ({ 
     await cleanupRow.getByRole('button', { name: 'Cancelar reserva', exact: true }).click();
     await cleanupRow.getByRole('button', { name: 'Sí, cancelar' }).click();
     await expect(cleanupRow).toContainText('Cancelada');
+    await expect.poll(async () => (await bookingEmails(setup.buyer.email, 'booking-cancellation')).length).toBe(1);
+    await expect.poll(async () => (await bookingEmails(setup.owner.email, 'owner-booking-cancellation')).length).toBe(1);
+    const [ownerCancellation] = await bookingEmails(setup.owner.email, 'owner-booking-cancellation');
+    expect(ownerCancellation.text).toContain('$90.000 COP');
+    expect(ownerCancellation.text).toContain('El horario vuelve a quedar sujeto a la disponibilidad actual de la cancha.');
     const [cancelled] = await pool.execute('SELECT status FROM bookings WHERE id = ?', [booking.id]);
     expect(cancelled[0].status).toBe('CANCELADA');
   } finally {
