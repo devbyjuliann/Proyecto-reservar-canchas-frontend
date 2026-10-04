@@ -6,6 +6,7 @@ import { api, ApiError, withQuery } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { ButtonPending, EmptyState, ErrorNotice, LoadingBlock } from '../components/Feedback.jsx';
 import { errorCopy, formatCancellationWindow, formatCOP, formatDate, formatInstant, formatPaymentCountdown, formatTime, priceMinorFromCOP, todayInTimeZone } from '../lib/format.js';
+import { toWompiWidgetConfig } from '../lib/wompi.js';
 
 export function BookingPage({ court }) {
   const auth = useAuth();
@@ -191,7 +192,7 @@ function PaymentPending({ booking, checkout, onExpired, onUpdated }) {
     try {
       const result = await api(`/api/v1/bookings/${booking.id}/payments/wompi/checkout`, { method: 'POST' });
       await loadWompiWidget();
-      const widget = new window.WidgetCheckout(result.config);
+      const widget = new window.WidgetCheckout(toWompiWidgetConfig(result));
       widget.open(async (widgetResult) => {
         setVerifying(true);
         try {
