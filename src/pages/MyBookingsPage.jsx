@@ -6,6 +6,7 @@ import { api, withQuery } from '../api/client.js';
 import { ButtonPending, EmptyState, ErrorNotice, LoadingBlock } from '../components/Feedback.jsx';
 import { PageHeading, StatusBadge } from '../components/Primitives.jsx';
 import { errorCopy, formatCancellationWindow, formatCOP, formatInstant, statusLabel, todayInTimeZone } from '../lib/format.js';
+import { refundPresentation } from '../lib/refunds.js';
 
 export function MyBookingsPage() {
   const [items, setItems] = useState([]);
@@ -78,6 +79,17 @@ function BookingRow({ booking, onChanged }) {
     || new Date(booking.paymentExpiresAt) <= new Date());
   const future = booking.status === 'CONFIRMADA' && new Date(booking.startAt) > new Date();
   const cancellable = future && Date.now() <= cutoff;
+  const refund = refundPresentation(booking);
+
+  async function chooseRefund() {
+    setPending(true); setError(null);
+    try {
+      await api(`/api/v1/bookings/${booking.id}/resolution`, { method: 'POST', body: { choice: 'REFUND' } });
+      onChanged({ ...booking, economicResolution: 'REFUND_REQUESTED', refundState: 'REFUND_PENDING' },
+        'Tu reembolso está siendo procesado.');
+    } catch (caught) { setError(caught); }
+    finally { setPending(false); }
+  }
 
   async function showHistory() {
     setHistoryOpen((current) => !current);
@@ -129,6 +141,13 @@ function BookingRow({ booking, onChanged }) {
        <div className="booking-outcome"><StatusBadge tone={booking.status === 'CONFIRMADA' ? 'positive' : booking.status === 'CANCELADA' ? 'negative' : 'neutral'}>{paymentExpired ? 'Pago vencido' : statusLabel(booking.status)}</StatusBadge><strong className="booking-price">{formatCOP(booking.priceMinor)}</strong>{booking.depositAmountMinor != null ? <small>Anticipo: {formatCOP(booking.amountPaidMinor ?? 0)} de {formatCOP(booking.depositAmountMinor)}</small> : null}</div>
        {pendingPayment && !paymentExpired ? <p className="notice notice-info">Pendiente de anticipo hasta {formatInstant(booking.paymentExpiresAt, booking.timeZone)}. El saldo presencial será {formatCOP(Math.max(0, (booking.priceMinor ?? 0) - (booking.depositAmountMinor ?? 0)))}.</p> : null}
        {paymentExpired ? <p className="notice notice-warning">El anticipo no se completó a tiempo y el horario fue liberado.</p> : null}
+       {refund.status ? <p className={refund.status === 'Reembolso procesado' ? 'notice notice-success' : 'notice notice-info'}>{refund.status}</p> : null}
+       {booking.economicOutcome === 'NON_REFUNDABLE' ? <p className="notice notice-info">El anticipo no es reembolsable.</p> : null}
+       {booking.exceptionApproved && future ? <p className="notice notice-info">Reprogramación sin costo prioritaria. Si no puedes reprogramar, cancela con la excepción aprobada para elegir la devolución.</p> : null}
+       {refund.canRequestRefund ? <div className="booking-actions">
+         {refund.canReschedule ? <button className="button button-secondary button-small" type="button" disabled={pending} onClick={() => setRescheduling((value) => !value)}>Reprogramar</button> : null}
+         <button className="button button-danger-subtle button-small" type="button" disabled={pending} onClick={chooseRefund}>Solicitar reembolso</button>
+       </div> : null}
       {future && !cancellable ? <p className="notice notice-info">El plazo normal para cancelar o cambiar esta reserva ya terminó.</p> : null}
        {future || confirming ? <div className={`booking-actions ${confirming ? 'is-confirming' : ''}`}>
          {(cancellable || booking.exceptionApproved) && !confirming ? <><button className="button button-secondary button-small" type="button" disabled={!booking.exceptionApproved && (booking.voluntaryRescheduleCount ?? 0) >= 1} onClick={() => { setRescheduling((value) => !value); setException(false); }}>Cambiar horario</button>{cancellable ? <button className="button button-danger-subtle button-small" type="button" onClick={() => { setConfirming(true); setRescheduling(false); }}>Cancelar reserva</button> : null}</> : null}
@@ -136,7 +155,7 @@ function BookingRow({ booking, onChanged }) {
         {future && booking.exceptionApproved && !cancellable ? <button className="button button-danger-subtle button-small" type="button" disabled={pending} onClick={cancelByException}>Cancelar con excepción aprobada</button> : null}
         {confirming ? <div className="booking-confirmation" role="group" aria-label={`Confirmar cancelación de ${booking.court.name}`}><strong>¿Cancelar esta reserva?</strong><p>{booking.court.name} · {booking.facility.name}. Permanecerá en tu historial como cancelada.</p><div><button className="button button-danger button-small" type="button" onClick={cancel} disabled={pending}><ButtonPending pending={pending} pendingLabel="Cancelando…">Sí, cancelar</ButtonPending></button><button className="button button-quiet button-small" type="button" onClick={() => setConfirming(false)} disabled={pending}>Conservar reserva</button></div></div> : null}
       </div> : null}
-      {rescheduling ? <ReschedulePanel booking={booking} onUpdated={(updated) => {
+       {rescheduling ? <ReschedulePanel booking={booking} onUpdated={(updated) => {
         onChanged(updated, 'Reserva actualizada.'); setHistory(null); setRescheduling(false);
       }} onClose={() => setRescheduling(false)} /> : null}
       {exception ? <form className="form-stack" onSubmit={askException}>

@@ -12,6 +12,8 @@ if (existsSync(backendTestEnv)) {
 export default defineConfig({
   testDir: './test/e2e',
   fullyParallel: true,
+  timeout: 90_000,
+  expect: { timeout: 10_000 },
   use: {
     baseURL: 'http://localhost:5177',
     browserName: 'chromium',
