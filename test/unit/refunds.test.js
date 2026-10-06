@@ -4,13 +4,10 @@ import test from 'node:test';
 import { refundPresentation } from '../../src/lib/refunds.js';
 
 test('only persisted eligible cancellations expose the refund action', () => {
-  assert.equal(refundPresentation({ status: 'CANCELADA', cancellationReason: 'CLIENTE_A_TIEMPO',
-    economicOutcome: 'NON_REFUNDABLE' }).canRequestRefund, false);
-  assert.deepEqual(refundPresentation({ status: 'CANCELADA', cancellationReason: 'CANCELLED_BY_OWNER',
-    economicOutcome: 'FULL_REFUND_OR_RESCHEDULE' }),
+  assert.equal(refundPresentation({ refundEligible: false, rescheduleEligible: false }).canRequestRefund, false);
+  assert.deepEqual(refundPresentation({ refundEligible: true, rescheduleEligible: true }),
   { canReschedule: true, canRequestRefund: true, status: null });
-  assert.equal(refundPresentation({ status: 'CANCELADA', cancellationReason: 'CLIENTE_EXCEPCION',
-    economicOutcome: 'REFUND_ALLOWED' }).canRequestRefund, true);
+  assert.equal(refundPresentation({ refundEligible: true, rescheduleEligible: false }).canRequestRefund, true);
 });
 
 test('pending and failed provider states never claim a refund has completed', () => {
